@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  langcahin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: langcahin-teddy:study
+    volumes:
+      - .:/workspace
+    tty: true
+    stdin_open: true
