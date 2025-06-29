@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  study:
+    image: node:23
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: tail -f /dev/null
