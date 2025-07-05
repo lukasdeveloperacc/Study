@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  react-native:
+    image: node:23
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: ["tail", "-f", "/dev/null"]
