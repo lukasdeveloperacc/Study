@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location"
 const { width: SCREEN_WIDTH } = Dimensions.get("window")
 
+const WEATHER_API_KEY = "b10f13c41a8d709be7dfb6bfbb4d47da"
 export default function App() {
   const [city, setCity] = useState<string>("Loading...");
   const [days, setDays] = useState<[]>([]);
