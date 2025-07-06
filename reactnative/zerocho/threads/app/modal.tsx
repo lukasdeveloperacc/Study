@@ -82,13 +82,28 @@ export default function Modal() {
 
     const getMyLocation = async (id: string) => {
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-            try {
-                await Location.requestForegroundPermissionsAsync();
-            } catch (error) {
-                console.error(error);
-            }
+        if (status !== "granted") { // granted : exist permission
+            Alert.alert("Location permission is not granted", "Please grant location permission",
+                [
+                    {
+                        text: "Open setting",
+                        onPress: () => {
+                            Linking.openSettings(); // Open Setting Window
+                        }
+                    },
+                    {
+                        text: "Cancel"
+                    }
+                ]
+            );
         }
+
+        const location = await Location.getCurrentPositionAsync({});
+        setThreads((prevThreads) =>
+            prevThreads.map((thread) =>
+                thread.id === id ? { ...thread, location: [location.coords.latitude, location.coords.longitude] } : thread
+            )
+        );
     };
 
     const renderThreadItem = ({
@@ -221,7 +236,6 @@ export default function Modal() {
                     <Text style={styles.postButtonText}>Post</Text>
                 </Pressable>
             </View>
-
         </View >
     );
 }
