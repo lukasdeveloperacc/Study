@@ -1,13 +1,16 @@
+import { AuthContext } from "@/app/_layout";
 import { BlurView } from "expo-blur";
 import { usePathname, useRouter } from "expo-router";
-import { Text, TouchableOpacity, View, StyleSheet, Image } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useContext } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
     const router = useRouter();
     const pathName = usePathname();
     const insets = useSafeAreaInsets();
-    const isLoggedIn = false;
+    const { user } = useContext(AuthContext);
+    const isLoggedIn = !!user;
 
     console.log("path name : ", pathName);
     console.log("insets : ", insets)
