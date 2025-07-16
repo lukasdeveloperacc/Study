@@ -40,18 +40,17 @@ const AnimatedTabBarButton = ({
             {...restProps}
             onPress={onPress}
             onPressOut={handlePressOut}
-            style={
-                [
-                    { flex: 1, justifyContent: "center", alignItems: "center" },
-                    style,
-                ]}
+            style={[
+                { flex: 1, justifyContent: "center", alignItems: "center" },
+                style,
+            ]}
             // Disable Android ripple effect
             android_ripple={{ borderless: false, radius: 0 }}
         >
             <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
                 {children}
             </Animated.View>
-        </Pressable >
+        </Pressable>
     );
 };
 
@@ -59,8 +58,8 @@ export default function TabLayout() {
     const router = useRouter();
     const { user } = useContext(AuthContext);
     const isLoggedIn = !!user;
+    console.log("user", user, "isLoggedIn", isLoggedIn);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
 
     const openLoginModal = () => {
         setIsLoginModalOpen(true);
@@ -72,17 +71,17 @@ export default function TabLayout() {
 
     const toLoginPage = () => {
         setIsLoginModalOpen(false);
-        router.push("/login")
-    }
+        router.push("/login");
+    };
 
     return (
         <>
             <Tabs
+                backBehavior="history"
                 screenOptions={{
                     headerShown: false,
-                    tabBarButton: (props) => <AnimatedTabBarButton {...props} />
+                    tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
                 }}
-                backBehavior="history"
             >
                 <Tabs.Screen
                     name="(home)"
@@ -114,8 +113,9 @@ export default function TabLayout() {
                     name="add"
                     listeners={{
                         tabPress: (e) => {
+                            console.log("tabPress");
+                            e.preventDefault();
                             if (isLoggedIn) {
-                                e.preventDefault();
                                 router.navigate("/modal");
                             } else {
                                 openLoginModal();
@@ -125,7 +125,11 @@ export default function TabLayout() {
                     options={{
                         tabBarLabel: () => null,
                         tabBarIcon: ({ focused }) => (
-                            <Ionicons name="add" size={24} color={focused ? "black" : "gray"} />
+                            <Ionicons
+                                name="add"
+                                size={24}
+                                color={focused ? "black" : "gray"}
+                            />
                         ),
                     }}
                 />
@@ -137,7 +141,7 @@ export default function TabLayout() {
                                 e.preventDefault();
                                 openLoginModal();
                             }
-                        }
+                        },
                     }}
                     options={{
                         tabBarLabel: () => null,
@@ -158,7 +162,7 @@ export default function TabLayout() {
                                 e.preventDefault();
                                 openLoginModal();
                             }
-                        }
+                        },
                     }}
                     options={{
                         tabBarLabel: () => null,
@@ -172,20 +176,12 @@ export default function TabLayout() {
                     }}
                 />
                 <Tabs.Screen
-                    name="following"
+                    name="(post)/[username]/post/[postID]"
                     options={{
-                        tabBarLabel: () => null,
                         href: null,
                     }}
                 />
-                <Tabs.Screen
-                    name="(post)/[username]/post/[postID]"
-                    options={{
-                        href: null
-                    }}
-                />
             </Tabs>
-
             <Modal
                 visible={isLoginModalOpen}
                 transparent={true}
