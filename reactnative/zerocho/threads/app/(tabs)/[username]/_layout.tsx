@@ -15,6 +15,7 @@ import {
     Text,
     useColorScheme,
     TouchableOpacity,
+    Share,
 } from "react-native";
 import { useState } from "react";
 import { AuthContext } from "@/app/_layout";
@@ -49,8 +50,16 @@ export default function TabLayout() {
 
     const handleCloseEditModal = () => setIsEditModalVisible(false);
 
-    const handleShareProfile = () => {
+    const handleShareProfile = async () => {
         console.log("share profile");
+        try {
+            Share.share({
+                url: `https://threads.net/@${user?.id}`,
+                title: `Check out my profile on Threads!`,
+            });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     return (
