@@ -25,7 +25,7 @@ interface Thread {
     text: string;
     hashtag?: string;
     location?: [number, number];
-    imageUris: string[];
+    imageUrls: string[];
 }
 
 export function ListFooter({
@@ -58,7 +58,7 @@ export default function Modal() {
     const colorScheme = useColorScheme();
     const router = useRouter();
     const [threads, setThreads] = useState<Thread[]>([
-        { id: Date.now().toString(), text: "", imageUris: [] },
+        { id: Date.now().toString(), text: "", imageUrls: [] },
     ]);
     const insets = useSafeAreaInsets();
     const [replyOption, setReplyOption] = useState("Anyone");
@@ -72,7 +72,39 @@ export default function Modal() {
         router.back();
     };
 
-    const handlePost = () => { };
+    const handlePost = () => {
+        console.log("handle Post", threads);
+        const formData = new FormData();
+        threads.forEach((thread, index) => {
+            formData.append(`posts[${index}][id]`, thread.id);
+            formData.append(`posts[${index}][content]`, thread.text);
+            formData.append(`posts[${index}][userId]`, "lotto0");
+            formData.append(`posts[${index}][location]`, JSON.stringify(thread.location) ?? "");
+            thread.imageUrls.forEach((imageUrl, imageIndex) => {
+                formData.append(`posts[${index}][imageUrls][${imageIndex}]`, {
+                    uri: imageUrl,
+                    type: "image/jpeg",
+                    name: `image_${index}_${imageIndex}.png`,
+                } as unknown as Blob);
+            });
+        });
+
+        fetch("/posts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "multipart/form-data ",
+            },
+            body: formData,
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("post result ", data);
+                router.replace(`/@${data[0].userId}/post/${data[0].id}`);
+            })
+            .catch((err) => {
+                console.log("post error ", err);
+            });
+    };
 
     const updateThreadText = (id: string, text: string) => {
         setThreads((prevThreads) =>
@@ -84,9 +116,9 @@ export default function Modal() {
 
     const canAddThread =
         (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
-        (threads.at(-1)?.imageUris.length ?? 0) > 0;
+        (threads.at(-1)?.imageUrls.length ?? 0) > 0;
     const canPost = threads.every(
-        (thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0
+        (thread) => thread.text.trim().length > 0 || thread.imageUrls.length > 0
     );
 
     const removeThread = (id: string) => {
@@ -122,7 +154,7 @@ export default function Modal() {
                     thread.id === id
                         ? {
                             ...thread,
-                            imageUris: thread.imageUris.concat(
+                            imageUrls: thread.imageUrls.concat(
                                 result.assets?.map((asset) => asset.uri) ?? []
                             ),
                         }
@@ -164,7 +196,7 @@ export default function Modal() {
                     thread.id === id
                         ? {
                             ...thread,
-                            imageUris: thread.imageUris.concat(
+                            imageUrls: thread.imageUrls.concat(
                                 result.assets?.map((asset) => asset.uri) ?? []
                             ),
                         }
@@ -180,7 +212,7 @@ export default function Modal() {
                 thread.id === id
                     ? {
                         ...thread,
-                        imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove),
+                        imageUrls: thread.imageUrls.filter((uri) => uri !== uriToRemove),
                     }
                     : thread
             )
@@ -248,7 +280,7 @@ export default function Modal() {
                                 : styles.usernameLight,
                         ]}
                     >
-                        zerohch0
+                        lotto0
                     </Text>
                     {index > 0 && (
                         <TouchableOpacity
@@ -271,9 +303,9 @@ export default function Modal() {
                     onChangeText={(text) => updateThreadText(item.id, text)}
                     multiline
                 />
-                {item.imageUris && item.imageUris.length > 0 && (
+                {item.imageUrls && item.imageUrls.length > 0 && (
                     <FlatList
-                        data={item.imageUris}
+                        data={item.imageUrls}
                         renderItem={({ item: uri, index: imgIndex }) => (
                             <View style={styles.imagePreviewContainer}>
                                 <Image source={{ uri }} style={styles.imagePreview} />
@@ -379,7 +411,7 @@ export default function Modal() {
                             if (canAddThread) {
                                 setThreads((prevThreads) => [
                                     ...prevThreads,
-                                    { id: Date.now().toString(), text: "", imageUris: [] },
+                                    { id: Date.now().toString(), text: "", imageUrls: [] },
                                 ]);
                             }
                         }}
