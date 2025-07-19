@@ -2,7 +2,7 @@ import { View, StyleSheet, useColorScheme } from "react-native";
 import { usePathname } from "expo-router";
 import Post, { type Post as PostType } from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 export default function Following() {
     const colorScheme = useColorScheme();

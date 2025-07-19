@@ -78,6 +78,7 @@ export default function TabLayout() {
         <MaterialTopTabs
           screenOptions={{
             lazy: true,
+            lazyPreloadDistance: 1,
             tabBarStyle: {
               backgroundColor: colorScheme === "dark" ? "#101010" : "white",
               shadowColor: "transparent",

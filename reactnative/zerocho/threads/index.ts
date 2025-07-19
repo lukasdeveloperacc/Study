@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-let lotto: User;
+let lotto;
 
 if (__DEV__) {
   if (window.server) {
@@ -101,12 +101,16 @@ if (__DEV__) {
       });
 
       this.get("/posts", (schema, request) => {
-        console.log("user.all", schema.all("user").models);
+        let posts = schema.all("post");
+        if (request.queryParams.type === "following") {
+          posts = posts.filter((post) => post.user?.id === lotto?.id);
+        }
+
         let targetIndex = -1;
         if (request.queryParams.cursor) {
-          targetIndex = schema.all("post").models.findIndex((v) => v.id === request.queryParams.cursor)
+          targetIndex = posts.models.findIndex((v) => v.id === request.queryParams.cursor)
         } 
-        return schema.all("post").slice(targetIndex + 1, targetIndex + 11);
+        return posts.slice(targetIndex + 1, targetIndex + 11);
       });
 
       this.get("/posts/:id", (schema, request) => {
