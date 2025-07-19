@@ -3,11 +3,13 @@ import { usePathname } from "expo-router";
 import Post, { type Post as PostType } from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
 import { useCallback, useState } from "react";
+import * as Haptics from "expo-haptics";
 
 export default function Index() {
   const colorScheme = useColorScheme();
   const path = usePathname();
   const [posts, setPosts] = useState<PostType[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   console.log("posts", posts.length);
 
   const onEndReached = useCallback(() => {
@@ -20,6 +22,21 @@ export default function Index() {
         }
       });
   }, [posts, path]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setPosts([]); // 임의로 보이는 효과를 위함
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    fetch(`/posts`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts(data.posts);
+        setRefreshing(false);
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
+  }, []);
 
   return (
     <View
@@ -34,6 +51,8 @@ export default function Index() {
         onEndReached={onEndReached}
         onEndReachedThreshold={2}
         estimatedItemSize={350}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
     </View>
   );
