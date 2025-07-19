@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
+import Toast, { ToastPosition } from "react-native-toast-message";
 
 interface Thread {
     id: string;
@@ -89,6 +90,22 @@ export default function Modal() {
             });
         });
 
+
+        let text1 = "Posting...";
+        let type = "customToast";
+        let visibilityTime = 5000;
+        let bottomOffset = 0;
+        let position: string = "bottom";
+
+        let tmp_data: Record<string, any>[] = []
+
+        Toast.show({
+            text1: text1,
+            type: type,
+            visibilityTime: visibilityTime,
+            bottomOffset: bottomOffset,
+            position: position as ToastPosition,
+        })
         fetch("/posts", {
             method: "POST",
             headers: {
@@ -98,11 +115,34 @@ export default function Modal() {
         })
             .then((res) => res.json())
             .then((data) => {
+                tmp_data = data;
                 console.log("post result ", data);
-                router.replace(`/@${data[0].userId}/post/${data[0].id}`);
+                text1 = "Post posted";
+                type = "customToast";
+                visibilityTime = 5000;
+                bottomOffset = 100;
+                position = "bottom";
             })
             .catch((err) => {
                 console.log("post error ", err);
+                text1 = "Post failed";
+                type = "customToast";
+                visibilityTime = 5000;
+                bottomOffset = 100;
+                position = "bottom";
+            })
+            .finally(() => {
+                Toast.hide();
+                Toast.show({
+                    text1: text1,
+                    type: type,
+                    visibilityTime: visibilityTime,
+                    bottomOffset: bottomOffset,
+                    position: position as ToastPosition,
+                    onPress: () => {
+                        router.replace(`/@${tmp_data[0].userId}/post/${tmp_data[0].id}`);
+                    },
+                })
             });
     };
 
