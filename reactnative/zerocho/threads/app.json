@@ -31,7 +31,7 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_MEDIA_LOCATION"
       ],
-      "package": "com.zerocho.threads",
+      "package": "com.lotto.threads",
       "googleServicesFile": "./google-services.json",
       "runtimeVersion": "1.0.0"
     },
