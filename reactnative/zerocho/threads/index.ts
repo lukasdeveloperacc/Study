@@ -11,7 +11,7 @@ import {
   Factory,
 } from "miragejs";
 import { faker } from "@faker-js/faker";
-import { type User } from "./app/_layout";
+import * as Device from "expo-device";
 
 declare global {
   interface Window {
@@ -21,7 +21,7 @@ declare global {
 
 let lotto;
 
-if (__DEV__) {
+if (__DEV__ && !Device.isDevice) {
   if (window.server) {
     window.server.shutdown();
   }

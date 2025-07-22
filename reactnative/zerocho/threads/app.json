@@ -17,8 +17,9 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.lukasdiego.threads"
-    },
+      "package": "com.lukasdiego.threads",
+      "googleServicesFile": "./google-services.json"
+    }, 
     "web": {
       "bundler": "metro",
       "output": "static",

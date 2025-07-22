@@ -10,3 +10,6 @@ expo-env.d.ts
 
 .DS_Store*
 android/
+
+threads-*.json
+google-services*.json

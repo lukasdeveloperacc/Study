@@ -9,6 +9,8 @@ import Constants from "expo-constants";
 import * as SplashScreen from "expo-splash-screen";
 import Toast, { BaseToast } from "react-native-toast-message";
 import * as Notifications from 'expo-notifications';
+import { NotificationContent } from "expo-notifications";
+import * as Device from "expo-device";
 
 // First, set the handler that will cause the notification
 // to show the alert
@@ -19,6 +21,12 @@ Notifications.setNotificationHandler({
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
+  handleSuccess: async (notificationId) => {
+    console.log("Notification sent successfully", notificationId);
+  },
+  handleError: async (error) => {
+    console.log("Notification failed to send", error);
+  },
 });
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
@@ -130,6 +138,25 @@ function AnimatedAppLoader({
   );
 }
 
+async function sendPushNotification(expoPushToken: string) {
+  const message = {
+    to: expoPushToken,
+    sound: "default",
+    title: "Original Title",
+    body: "And here is the body!",
+    data: { someData: "goes here" },
+  };
+
+  fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Accept-encoding": "gzip, deflate",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(message),
+  });
+}
 function AnimatedSplashScreen({
   children,
   image,
@@ -141,6 +168,7 @@ function AnimatedSplashScreen({
   const [isSplashAnimationComplete, setAnimationComplete] = useState(false);
   const animation = useRef(new Animated.Value(1)).current;
   const { updateUser } = useContext(AuthContext);
+  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAppReady) {
@@ -151,6 +179,12 @@ function AnimatedSplashScreen({
       }).start(() => setAnimationComplete(true));
     }
   }, [isAppReady]);
+
+  useEffect(() => {
+    if (expoPushToken && Device.isDevice) {
+      sendPushNotification(expoPushToken);
+    }
+  }, [expoPushToken]);
 
   const onImageLoaded = async () => {
     try {
@@ -166,14 +200,13 @@ function AnimatedSplashScreen({
       if (status !== 'granted') {
         return Linking.openSettings();
       }
-      // Second, call scheduleNotificationAsync()
-      const notification = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'App is ready',
-          body: "Trying to upload new post",
-        },
-        trigger: null,
+      const token = await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig?.extra?.projectId ?? Constants.easConfig?.projectId,
       });
+      console.log("token", token);
+      // TODO: save the token to server 
+      setExpoPushToken(token.data);
+
     } catch (e) {
       console.error(e);
     } finally {
