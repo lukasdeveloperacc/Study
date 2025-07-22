@@ -10,8 +10,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "./_layout";
 import { useContext, useEffect } from "react";
-import { initializeKakaoSDK } from "@react-native-kakao/core"
-import { login as kakaoLogin } from "@react-native-kakao/user"
+import { getKeyHashAndroid, initializeKakaoSDK } from "@react-native-kakao/core"
+import { login as kakaoLogin, me } from "@react-native-kakao/user"
 
 export default function Login() {
     const colorScheme = useColorScheme();
@@ -29,12 +29,18 @@ export default function Login() {
 
     const onKakaoLogin = async () => {
         try {
+            console.log("key: ", await getKeyHashAndroid());
             const result = await kakaoLogin();
             console.log(result);
+            const user = await me();
+            console.log(user);
+            // TODO: save the token to server 
+            // TODO: save the user token to AsyncStorage, SecureStore from server
         } catch (error) {
             console.error(error);
         }
     };
+
     return (
         <View
             style={{
