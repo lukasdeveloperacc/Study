@@ -1,4 +1,4 @@
-{
+export default {
   "expo": {
     "name": "threads",
     "slug": "threads",
@@ -62,7 +62,7 @@
       [
         "@react-native-kakao/core",
         {
-          "nativeAppKey": "dd59f777e92bc8c3cbddde561e1a1032",
+          "nativeAppKey": process.env.KAKAO_NATIVE_KEY,
           "android": {
             "authCodeHandlerActivity": true
           },
@@ -108,6 +108,7 @@
       "typedRoutes": true
     },
     "extra": {
+      "kakaoNativeKey": process.env.KAKAO_NATIVE_KEY,
       "router": {},
       "eas": {
         "projectId": "7f13ee6a-b7a9-442a-aa83-93474ef85488"
