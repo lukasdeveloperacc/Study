@@ -4,7 +4,7 @@ export default {
     "slug": "threads",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/new-icon.png",
     "scheme": "threadc",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
