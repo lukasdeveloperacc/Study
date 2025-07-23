@@ -25,6 +25,8 @@ import { StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SideMenu from "@/components/SideMenu";
 import EditProfileModal from "@/components/EditProfileModal";
+import Constants from "expo-constants";
+
 const { Navigator } = createMaterialTopTabNavigator();
 
 export const MaterialTopTabs = withLayoutContext<
@@ -68,7 +70,7 @@ export default function TabLayout() {
         console.log("user", user ? user.id : "");
         if (username !== `@${user?.id}`) {
             setProfile(null);
-            fetch(`/users/${username}`)
+            fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username}`)
                 .then(res => res.json())
                 .then(data => {
                     console.log(data);

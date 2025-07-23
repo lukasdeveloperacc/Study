@@ -7,6 +7,8 @@ import * as Haptics from "expo-haptics";
 import Animated, { useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useContext } from "react";
 import { AnimationContext } from "@/app/(tabs)/(home)/_layout";
+import Constants from "expo-constants";
+
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList<PostType>);
 
 export default function Index() {
@@ -20,7 +22,7 @@ export default function Index() {
 
   const onEndReached = useCallback(() => {
     console.log("onEndReached", posts.at(-1)?.id);
-    fetch(`/posts?cursor=${posts.at(-1)?.id}`)
+    fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/posts?cursor=${posts.at(-1)?.id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.posts.length > 0) {
@@ -33,7 +35,7 @@ export default function Index() {
     setRefreshing(true);
     setPosts([]); // 임의로 보이는 효과를 위함
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    fetch(`/posts`)
+    fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/posts`)
       .then((res) => res.json())
       .then((data) => {
         setPosts(data.posts);

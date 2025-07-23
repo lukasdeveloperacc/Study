@@ -3,6 +3,7 @@ import { usePathname } from "expo-router";
 import Post, { type Post as PostType } from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
 import { useCallback, useState } from "react";
+import Constants from "expo-constants";
 
 export default function Following() {
     const colorScheme = useColorScheme();
@@ -12,7 +13,7 @@ export default function Following() {
 
     const onEndReached = useCallback(() => {
         console.log("onEndReached", posts.at(-1)?.id);
-        fetch(`/posts?type=following&cursor=${posts.at(-1)?.id}`)
+        fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/posts?type=following&cursor=${posts.at(-1)?.id}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.posts.length > 0) {

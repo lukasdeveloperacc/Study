@@ -108,6 +108,7 @@ export default {
       "typedRoutes": true
     },
     "extra": {
+      "apiUrl": "http://192.168.0.26:3000",
       "kakaoNativeKey": process.env.KAKAO_NATIVE_KEY,
       "router": {},
       "eas": {

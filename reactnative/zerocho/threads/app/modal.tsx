@@ -20,6 +20,7 @@ import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import Toast, { ToastPosition } from "react-native-toast-message";
+import Constants from "expo-constants";
 
 interface Thread {
     id: string;
@@ -106,7 +107,7 @@ export default function Modal() {
             bottomOffset: bottomOffset,
             position: position as ToastPosition,
         })
-        fetch("/posts", {
+        fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/posts`, {
             method: "POST",
             headers: {
                 "Content-Type": "multipart/form-data ",

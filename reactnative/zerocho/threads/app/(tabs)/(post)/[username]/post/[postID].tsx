@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
+import Constants from "expo-constants";
 
 export default function PostScreen() {
     const router = useRouter();
@@ -25,14 +26,14 @@ export default function PostScreen() {
     const [comments, setComments] = useState<PostType[] | null>(null);
 
     useEffect(() => {
-        fetch(`/posts/${postID}`)
+        fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/posts/${postID}`)
             .then(res => res.json())
             .then(data => {
                 console.log(data);
                 setPost(data.post);
             })
 
-        fetch(`/posts/${postID}/comments`)
+        fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/posts/${postID}/comments`)
             .then(res => res.json())
             .then(data => {
                 console.log(data);
