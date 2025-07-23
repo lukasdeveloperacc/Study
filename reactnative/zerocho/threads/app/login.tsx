@@ -12,6 +12,7 @@ import { AuthContext } from "./_layout";
 import { useContext, useEffect } from "react";
 import { getKeyHashAndroid, initializeKakaoSDK } from "@react-native-kakao/core"
 import { login as kakaoLogin, me } from "@react-native-kakao/user"
+import * as AppleAuthentication from "expo-apple-authentication"
 
 export default function Login() {
     const colorScheme = useColorScheme();
@@ -26,6 +27,20 @@ export default function Login() {
     useEffect(() => {
         initializeKakaoSDK("dd59f777e92bc8c3cbddde561e1a1032");
     }, []);
+
+    const onAppleLogin = async () => {
+        try {
+            const credential = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+            });
+            console.log(credential);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const onKakaoLogin = async () => {
         try {
@@ -60,7 +75,7 @@ export default function Login() {
             <Pressable style={styles.kakaoLoginButton} onPress={onKakaoLogin}>
                 <Text style={styles.kakaoLoginButtonText}>KakaoLogin</Text>
             </Pressable>
-            <Pressable style={styles.appleLoginButton} onPress={login}>
+            <Pressable style={styles.appleLoginButton} onPress={onAppleLogin}>
                 <Text style={styles.appleLoginButtonText}>Apple Login</Text>
             </Pressable>
         </View>
