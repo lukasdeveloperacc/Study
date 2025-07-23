@@ -25,7 +25,7 @@ export default function Login() {
     }
 
     useEffect(() => {
-        initializeKakaoSDK("dd59f777e92bc8c3cbddde561e1a1032");
+        initializeKakaoSDK(process.env.EXPO_PUBLIC_KAKAO_NATIVE_KEY as string);
     }, []);
 
     const onAppleLogin = async () => {
