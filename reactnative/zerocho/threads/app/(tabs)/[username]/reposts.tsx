@@ -11,7 +11,6 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/app/_layout";
 import { FlashList } from "@shopify/flash-list";
 import Post from "@/components/Post";
-import Constants from "expo-constants";
 
 export default function Reposts() {
     const colorScheme = useColorScheme();
@@ -23,7 +22,7 @@ export default function Reposts() {
 
     useEffect(() => {
         setThreads([]);
-        fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username?.slice(1)}/reposts`)
+        fetch(`/users/${username?.slice(1)}/reposts`)
             .then((res) => res.json())
             .then((data) => {
                 setThreads(data.posts);
@@ -33,9 +32,9 @@ export default function Reposts() {
     const onEndReached = () => {
         console.log(
             "onEndReached",
-            `${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username?.slice(1)}/reposts?cursor=${threads.at(-1)?.id}`
+            `/users/${username?.slice(1)}/reposts?cursor=${threads.at(-1)?.id}`
         );
-        fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username?.slice(1)}/reposts?cursor=${threads.at(-1)?.id}`)
+        fetch(`/users/${username?.slice(1)}/reposts?cursor=${threads.at(-1)?.id}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.posts.length > 0) {

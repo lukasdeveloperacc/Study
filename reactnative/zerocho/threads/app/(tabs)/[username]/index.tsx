@@ -11,7 +11,6 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/app/_layout";
 import { FlashList } from "@shopify/flash-list";
 import Post from "@/components/Post";
-import Constants from "expo-constants";
 
 const Header = () => {
   const { user } = useContext(AuthContext);
@@ -69,7 +68,7 @@ export default function Index() {
 
   useEffect(() => {
     setThreads([]);
-    fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username?.slice(1)}/threads`)
+    fetch(`/users/${username?.slice(1)}/threads`)
       .then((res) => res.json())
       .then((data) => {
         setThreads(data.posts);
@@ -79,9 +78,9 @@ export default function Index() {
   const onEndReached = () => {
     console.log(
       "onEndReached",
-      `${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username?.slice(1)}/threads?cursor=${threads.at(-1)?.id}`
+      `/users/${username?.slice(1)}/threads?cursor=${threads.at(-1)?.id}`
     );
-    fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username?.slice(1)}/threads?cursor=${threads.at(-1)?.id}`)
+    fetch(`/users/${username?.slice(1)}/threads?cursor=${threads.at(-1)?.id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.posts.length > 0) {

@@ -14,3 +14,4 @@ android/
 threads-*.json
 google-services*.json
 .env
+dist/

@@ -25,8 +25,6 @@ import { StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SideMenu from "@/components/SideMenu";
 import EditProfileModal from "@/components/EditProfileModal";
-import Constants from "expo-constants";
-
 const { Navigator } = createMaterialTopTabNavigator();
 
 export const MaterialTopTabs = withLayoutContext<
@@ -47,6 +45,21 @@ export default function TabLayout() {
     const isOwnProfile = isLoggedIn && user?.id === username?.slice(1);
     const [profile, setProfile] = useState<User | null>(null);
 
+    useEffect(() => {
+        console.log("username", username, `@${user?.id}`);
+        if (username !== `@${user?.id}`) {
+            setProfile(null);
+            fetch(`/users/${username}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log("fetch user", data);
+                    setProfile(data.user);
+                });
+        } else {
+            setProfile(user);
+        }
+    }, [username]);
+
     const handleOpenEditModal = () => {
         setIsEditModalVisible(true);
     };
@@ -56,30 +69,16 @@ export default function TabLayout() {
     const handleShareProfile = async () => {
         console.log("share profile");
         try {
-            Share.share({
-                url: `https://threads.net/@${user?.id}`,
-                title: `Check out my profile on Threads!`,
+            await Share.share({
+                message: `thread://@${username}`,
+                url: `thread://@${username}`,
             });
-        } catch (e) {
-            console.log(e);
+        } catch (error) {
+            console.log(error);
         }
     };
 
-    useEffect(() => {
-        console.log("username", username);
-        console.log("user", user ? user.id : "");
-        if (username !== `@${user?.id}`) {
-            setProfile(null);
-            fetch(`${__DEV__ ? "" : Constants.expoConfig?.extra?.apiUrl}/users/${username}`)
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-                    setProfile(data.user);
-                })
-        } else {
-            setProfile(user);
-        }
-    }, [username])
+    console.log("profile", profile);
 
     return (
         <View

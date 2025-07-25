@@ -1,62 +1,30 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Href, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Alert, View, StyleSheet, Image, Animated, Linking } from "react-native";
+import { Alert, View, StyleSheet, Animated, Linking } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { Asset } from "expo-asset";
 import Constants from "expo-constants";
 import * as SplashScreen from "expo-splash-screen";
 import Toast, { BaseToast } from "react-native-toast-message";
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
-import { router } from 'expo-router';
-
-function useNotificationObserver() {
-  useEffect(() => {
-    let isMounted = true;
-
-    function redirect(notification: Notifications.Notification) {
-      const url = notification.request.content.data?.url as string;
-      if (url && url.startsWith('threadc://')) { // threadc means scheme
-        Alert.alert('Redirect to ' + url);
-        router.push(url.replace('threadc://', '/') as Href); // threadc://@username -> /@username 
-      }
-    }
-
-    Notifications.getLastNotificationResponseAsync()
-      .then(response => {
-        if (!isMounted || !response?.notification) {
-          return;
-        }
-        redirect(response?.notification);
-      });
-
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      redirect(response.notification);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.remove();
-    };
-  }, []);
-}
-
+import * as Updates from "expo-updates";
 // First, set the handler that will cause the notification
 // to show the alert
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
-  handleSuccess: async (notificationId) => {
-    console.log("Notification sent successfully", notificationId);
+  handleSuccess(notificationId) {
+    console.log("handleSuccess", notificationId);
   },
-  handleError: async (error) => {
-    console.log("Notification failed to send", error);
+  handleError(notificationId, error) {
+    console.log("handleError", notificationId, error);
   },
 });
 
@@ -102,42 +70,32 @@ function AnimatedAppLoader({
     prepare();
   }, [image]);
 
-  const login = async () => {
+  const login = () => {
     console.log("login");
-    try {
-      const res = await fetch("/login", {
-        method: "POST",
-        body: JSON.stringify({
-          username: "lotto",
-          password: "1234",
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      let data;
-      try {
-        data = await res.json();
-      } catch (e) {
-        data = undefined;
-      }
-      console.log("res", res, res.status);
-      console.log("data", data);
-      if (res.ok && data && data.user) {
+    return fetch("/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "lotto",
+        password: "1234",
+      }),
+    })
+      .then((res) => {
+        console.log("res", res, res.status);
+        if (res.status >= 400) {
+          return Alert.alert("Error", "Invalid credentials");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("data", data);
         setUser(data.user);
-        await Promise.all([
+        return Promise.all([
           SecureStore.setItemAsync("accessToken", data.accessToken),
           SecureStore.setItemAsync("refreshToken", data.refreshToken),
           AsyncStorage.setItem("user", JSON.stringify(data.user)),
         ]);
-      } else {
-        const errorMsg = data?.message || "Login failed";
-        Alert.alert("Login Error", errorMsg);
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Login Error", "An unexpected error occurred");
-    }
+      })
+      .catch(console.error);
   };
 
   const logout = () => {
@@ -178,7 +136,7 @@ async function sendPushNotification(expoPushToken: string) {
     data: { someData: "goes here" },
   };
 
-  fetch("https://exp.host/--/api/v2/push/send", {
+  await fetch("https://exp.host/--/api/v2/push/send", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -188,6 +146,7 @@ async function sendPushNotification(expoPushToken: string) {
     body: JSON.stringify(message),
   });
 }
+
 function AnimatedSplashScreen({
   children,
   image,
@@ -201,6 +160,12 @@ function AnimatedSplashScreen({
   const { updateUser } = useContext(AuthContext);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
+  const { currentlyRunning, isUpdateAvailable, isUpdatePending } =
+    Updates.useUpdates();
+  console.log("currentlyRunning", currentlyRunning);
+  console.log("isUpdateAvailable", isUpdateAvailable);
+  console.log("isUpdatePending", isUpdatePending);
+
   useEffect(() => {
     if (isAppReady) {
       Animated.timing(animation, {
@@ -211,12 +176,28 @@ function AnimatedSplashScreen({
     }
   }, [isAppReady]);
 
-  useEffect(() => {
-    if (expoPushToken && Device.isDevice) {
-      Alert.alert("Push Token", expoPushToken);
-      sendPushNotification(expoPushToken);
+  async function onFetchUpdateAsync() {
+    try {
+      if (!__DEV__) {
+        const update = await Updates.checkForUpdateAsync();
+
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          Alert.alert("Update available", "Please update your app", [
+            {
+              text: "Update",
+              onPress: () => Updates.reloadAsync(),
+            },
+            { text: "Cancel", style: "cancel" },
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      // You can also add an alert() to see the error message in case of an error when fetching updates.
+      alert(`Error fetching latest Expo update: ${error}`);
     }
-  }, [expoPushToken]);
+  }
 
   const onImageLoaded = async () => {
     try {
@@ -225,26 +206,34 @@ function AnimatedSplashScreen({
         AsyncStorage.getItem("user").then((user) => {
           updateUser?.(user ? JSON.parse(user) : null);
         }),
+        onFetchUpdateAsync(),
         // TODO: validating access token
       ]);
       await SplashScreen.hideAsync();
       const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         return Linking.openSettings();
       }
       const token = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.projectId ?? Constants.easConfig?.projectId,
+        projectId:
+          Constants?.expoConfig?.extra?.eas?.projectId ??
+          Constants?.easConfig?.projectId,
       });
       console.log("token", token);
-      // TODO: save the token to server 
+      // TODO: save token to server
       setExpoPushToken(token.data);
-
     } catch (e) {
       console.error(e);
     } finally {
       setAppReady(true);
     }
   };
+
+  useEffect(() => {
+    if (expoPushToken && Device.isDevice) {
+      sendPushNotification(expoPushToken);
+    }
+  }, [expoPushToken]);
 
   const rotateValue = animation.interpolate({
     inputRange: [0, 1],
@@ -286,33 +275,33 @@ function AnimatedSplashScreen({
 }
 
 export default function RootLayout() {
-  useNotificationObserver();
-
   const toastConfig = {
     customToast: (props: any) => (
-      <Animated.View>
-        <BaseToast
-          style={{
-            borderWidth: 1,
-            borderColor: "#ccc",
-            borderRadius: 10,
-            padding: 10,
-            backgroundColor: "#fff",
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.23,
-            shadowRadius: 2.62,
-            elevation: 4,
-          }}
-          text1={props.text1}
-          onPress={props.onPress}
-        />
-      </Animated.View>
-    )
+      <BaseToast
+        style={{
+          backgroundColor: "white",
+          borderRadius: 20,
+          height: 40,
+          borderLeftWidth: 0,
+          shadowOpacity: 0,
+          justifyContent: "center",
+        }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          alignItems: "center",
+          height: 40,
+        }}
+        text1Style={{
+          color: "black",
+          fontSize: 14,
+          fontWeight: "500",
+        }}
+        text1={props.text1}
+        onPress={props.onPress}
+      />
+    ),
   };
+
   return (
     <AnimatedAppLoader image={require("../assets/images/react-logo.png")}>
       <StatusBar style="auto" animated hidden={false} />
