@@ -5,6 +5,7 @@ export default function RootLayout() {
   // Custom이 필요한 경우에만 따로 작성해준다고 보면된다. ex) modal
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen name="modal" options={{ presentation: "modal" }} /> {/* presentation: "modal" 모달로 띄우기 Stack에서만 된다.*/}
     </Stack>
   );

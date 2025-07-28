@@ -29,7 +29,7 @@ export default function Index() {
             }}
         >
             <View>
-                <TouchableOpacity onPress={() => router.replace(`/activity`)}> {/* router.push router.replace router. navigate */}
+                <TouchableOpacity onPress={() => router.replace(`/activity`)}>
                     <Text style={{ color: pathname === "/activity" ? "red" : "black" }}>
                         All
                     </Text>
