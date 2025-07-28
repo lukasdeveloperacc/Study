@@ -46,16 +46,17 @@
         {
           "photosPermission": "The app accesses your photos to let you share them in your threads.",
           "cameraPermission": "The app accesses your camera to let you share photos in your threads."
-        },
-        [
-          "expo-media-library",
-          {
-            "photosPermission": "Allow threads to access your photos.",
-            "savePhotosPermission": "Allow threads to save photos.",
-            "isAccessMediaLocationEnabled": true
-          }
-        ]
-      ]
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow threads to access your photos.",
+          "savePhotosPermission": "Allow threads to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

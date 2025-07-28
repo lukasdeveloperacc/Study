@@ -1,8 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
+import { type BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
-import { useRef, useState } from "react";
-import { Animated, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { useContext, useRef, useState } from "react";
+import {
+    Animated,
+    Modal,
+    Pressable,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { AuthContext } from "../_layout";
 
 const AnimatedTabBarButton = ({
     children,
@@ -48,9 +56,10 @@ const AnimatedTabBarButton = ({
 
 export default function TabLayout() {
     const router = useRouter();
-    const isLoggedIn = true;
+    const { user } = useContext(AuthContext);
+    const isLoggedIn = !!user;
+    console.log("user", user, "isLoggedIn", isLoggedIn);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    const scaleValue = useRef(new Animated.Value(1)).current;
 
     const openLoginModal = () => {
         setIsLoginModalOpen(true);
@@ -60,10 +69,15 @@ export default function TabLayout() {
         setIsLoginModalOpen(false);
     };
 
+    const toLoginPage = () => {
+        setIsLoginModalOpen(false);
+        router.push("/login");
+    };
+
     return (
         <>
             <Tabs
-                backBehavior="history" /* 기본이 initial Route라 home으로 가버린다.  */
+                backBehavior="history"
                 screenOptions={{
                     headerShown: false,
                     tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
@@ -99,6 +113,7 @@ export default function TabLayout() {
                     name="add"
                     listeners={{
                         tabPress: (e) => {
+                            console.log("tabPress");
                             e.preventDefault();
                             if (isLoggedIn) {
                                 router.navigate("/modal");
@@ -169,10 +184,9 @@ export default function TabLayout() {
             </Tabs>
             <Modal
                 visible={isLoginModalOpen}
-                transparent={true} /* 투명한 배경, 뒷 부분이 보임 */
-                animationType="slide" /* 올라 갔다 내렸갔다 하는 형식으로 보임 */
+                transparent={true}
+                animationType="slide"
             >
-                {/* login modal */}
                 <View
                     style={{
                         flex: 1,
@@ -181,7 +195,9 @@ export default function TabLayout() {
                     }}
                 >
                     <View style={{ backgroundColor: "white", padding: 20 }}>
-                        <Text>Login Modal</Text>
+                        <Pressable onPress={toLoginPage}>
+                            <Text>Login Modal</Text>
+                        </Pressable>
                         <TouchableOpacity onPress={closeLoginModal}>
                             <Ionicons name="close" size={24} color="#555" />
                         </TouchableOpacity>
