@@ -1,5 +1,7 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -8,6 +10,7 @@ import {
     Image,
     Linking,
     Pressable,
+    Modal as RNModal,
     StyleSheet,
     Text,
     TextInput,
@@ -77,12 +80,12 @@ export default function Modal() {
         );
     };
 
-    const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0;
-    const canPost = threads.every((thread) => thread.text.trim().length > 0);
-
-    const addImageToThread = (id: string, uri: string) => { };
-
-    const addLocationToThread = (id: string, location: [number, number]) => { };
+    const canAddThread =
+        (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
+        (threads.at(-1)?.imageUris.length ?? 0) > 0;
+    const canPost = threads.every(
+        (thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0
+    );
 
     const removeThread = (id: string) => {
         setThreads((prevThreads) =>
@@ -90,11 +93,97 @@ export default function Modal() {
         );
     };
 
-    const pickImage = async (id: string) => { };
+    const pickImage = async (id: string) => {
+        let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+            Alert.alert(
+                "Photos permission not granted",
+                "Please grant photos permission to use this feature",
+                [
+                    { text: "Open settings", onPress: () => Linking.openSettings() },
+                    {
+                        text: "Cancel",
+                    },
+                ]
+            );
+            return;
+        }
+        let result = await ImagePicker.launchImageLibraryAsync({ /* 이미지 라이브러리에서 이미지 선택 */
+            mediaTypes: ["images", "livePhotos", "videos"],
+            allowsMultipleSelection: true,
+            selectionLimit: 5,
+        });
+        console.log("image result", result);
+        if (!result.canceled) {
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) =>
+                    thread.id === id
+                        ? {
+                            ...thread,
+                            imageUris: thread.imageUris.concat(
+                                result.assets?.map((asset) => asset.uri) ?? []
+                            ),
+                        }
+                        : thread
+                )
+            );
+        }
+    };
 
-    const takePhoto = async (id: string) => { };
+    const takePhoto = async (id: string) => {
+        let { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+            Alert.alert(
+                "Camera permission not granted",
+                "Please grant camera permission to use this feature",
+                [
+                    { text: "Open settings", onPress: () => Linking.openSettings() },
+                    {
+                        text: "Cancel",
+                    },
+                ]
+            );
+            return;
+        }
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ["images", "livePhotos", "videos"],
+            allowsMultipleSelection: true,
+            selectionLimit: 5,
+        });
+        console.log("camera result", result);
+        status = (await MediaLibrary.requestPermissionsAsync()).status;
+        if (status === "granted" && result.assets?.[0].uri) {
+            MediaLibrary.saveToLibraryAsync(result.assets[0].uri);
+        }
 
-    const removeImageFromThread = (id: string, uriToRemove: string) => { };
+        if (!result.canceled) {
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) =>
+                    thread.id === id
+                        ? {
+                            ...thread,
+                            imageUris: thread.imageUris.concat(
+                                result.assets?.map((asset) => asset.uri) ?? []
+                            ),
+                        }
+                        : thread
+                )
+            );
+        }
+    };
+
+    const removeImageFromThread = (id: string, uriToRemove: string) => {
+        setThreads((prevThreads) =>
+            prevThreads.map((thread) =>
+                thread.id === id
+                    ? {
+                        ...thread,
+                        imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove),
+                    }
+                    : thread
+            )
+        );
+    };
 
     const getMyLocation = async (id: string) => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -107,7 +196,7 @@ export default function Modal() {
                     {
                         text: "Open settings",
                         onPress: () => {
-                            Linking.openSettings(); // 직접 권한 창을 띄워줄 수 있다. 
+                            Linking.openSettings();
                         },
                     },
                     {
@@ -166,12 +255,11 @@ export default function Modal() {
                     placeholderTextColor="#999"
                     value={item.text}
                     onChangeText={(text) => updateThreadText(item.id, text)}
-                    multiline // 이게 있어야 여러줄 넣어줄 수 있음
+                    multiline
                 />
                 {item.imageUris && item.imageUris.length > 0 && (
-                    <FlatList // 이미지를 위한 FlatList
+                    <FlatList
                         data={item.imageUris}
-                        // 데이터를 어떻게 보여줄지 
                         renderItem={({ item: uri, index: imgIndex }) => (
                             <View style={styles.imagePreviewContainer}>
                                 <Image source={{ uri }} style={styles.imagePreview} />
@@ -189,11 +277,10 @@ export default function Modal() {
                                 </TouchableOpacity>
                             </View>
                         )}
-                        // 고유한 값 지정
                         keyExtractor={(uri, imgIndex) =>
                             `${item.id}-img-${imgIndex}-${uri}`
                         }
-                        horizontal // 이미지가 가로로 보이게해준다. 
+                        horizontal
                         showsHorizontalScrollIndicator={false}
                         style={styles.imageFlatList}
                     />
@@ -247,7 +334,6 @@ export default function Modal() {
                 data={threads}
                 keyExtractor={(item) => item.id}
                 renderItem={renderThreadItem}
-                // Footer도 추가할 수 있다. 
                 ListFooterComponent={
                     <ListFooter
                         canAddThread={canAddThread}
@@ -261,13 +347,49 @@ export default function Modal() {
                         }}
                     />
                 }
-                // Flat list 전체에 반영되는 스타일
                 style={styles.list}
-                // container : renderItem, Footer를 감싸는 컴포넌트
                 contentContainerStyle={{ backgroundColor: "#ddd" }}
-                // 누르면 키보드 뜬다. 
                 keyboardShouldPersistTaps="handled"
             />
+
+            <RNModal
+                transparent={true}
+                visible={isDropdownVisible}
+                animationType="fade"
+                onRequestClose={() => setIsDropdownVisible(false)}
+            >
+                <Pressable
+                    style={styles.modalOverlay}
+                    onPress={() => setIsDropdownVisible(false)}
+                >
+                    <View
+                        style={[styles.dropdownContainer, { bottom: insets.bottom + 30 }]}
+                    >
+                        {replyOptions.map((option) => (
+                            <Pressable
+                                key={option}
+                                style={[
+                                    styles.dropdownOption,
+                                    option === replyOption && styles.selectedOption,
+                                ]}
+                                onPress={() => {
+                                    setReplyOption(option);
+                                    setIsDropdownVisible(false);
+                                }}
+                            >
+                                <Text
+                                    style={[
+                                        styles.dropdownOptionText,
+                                        option === replyOption && styles.selectedOptionText,
+                                    ]}
+                                >
+                                    {option}
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </View>
+                </Pressable>
+            </RNModal>
 
             <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
                 <Pressable onPress={() => setIsDropdownVisible(true)}>
@@ -436,11 +558,11 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     dropdownContainer: {
+        width: 200,
         backgroundColor: "#fff",
         borderRadius: 10,
         marginHorizontal: 10,
         overflow: "hidden",
-        marginBottom: 5,
     },
     dropdownOption: {
         paddingVertical: 15,
