@@ -124,9 +124,10 @@ export default function TabLayout() {
             </Tabs>
             <Modal
                 visible={isLoginModalOpen}
-                transparent={true}
-                animationType="slide"
+                transparent={true} /* 투명한 배경, 뒷 부분이 보임 */
+                animationType="slide" /* 올라 갔다 내렸갔다 하는 형식으로 보임 */
             >
+                {/* login modal */}
                 <View
                     style={{
                         flex: 1,
