@@ -19,7 +19,7 @@ export default function TabLayout() {
     return (
         <>
             <Tabs
-                backBehavior="history"
+                backBehavior="history" /* 기본이 initial Route라 home으로 가버린다.  */
                 screenOptions={{
                     headerShown: false,
                 }}
