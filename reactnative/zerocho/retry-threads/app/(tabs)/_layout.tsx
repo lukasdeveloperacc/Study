@@ -1,82 +1,147 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
+import { useState } from "react";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 export default function TabLayout() {
     const router = useRouter();
+    const isLoggedIn = true;
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    const openLoginModal = () => {
+        setIsLoginModalOpen(true);
+    };
+
+    const closeLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
 
     return (
-        <Tabs
-            screenOptions={{
-                headerShown: false, // 헤더에 tsx 내용이 나옴 없애버리고 싶으면 false 
-            }}
-        >
-            <Tabs.Screen // Tabs.Screen 으로 탭의 순서를 정할 수 있음 
-                name="index"
-                options={{
-                    tabBarLabel: () => null,
-                    tabBarIcon: ({ focused }) => (
-                        <Ionicons
-                            name="home"
-                            size={24}
-                            color={focused ? "black" : "gray"}
-                        />
-                    ),
+        <>
+            <Tabs
+                backBehavior="history"
+                screenOptions={{
+                    headerShown: false,
                 }}
-            />
-            <Tabs.Screen
-                name="search"
-                options={{
-                    tabBarLabel: () => null,
-                    tabBarIcon: ({ focused }) => (
-                        <Ionicons
-                            name="search"
-                            size={24}
-                            color={focused ? "black" : "gray"}
-                        />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="add"
-                listeners={{
-                    tabPress: (e) => {
-                        e.preventDefault(); // add.tsx 뜨는 것 방지 
-                        router.navigate("/modal"); // modal.tsx 를 찾을 것 -> 부모 _layout 체크 -> 모달 처럼뜨는 옵션 확인 후 모달처럼 렌더링!
-                    },
-                }}
-                options={{
-                    tabBarLabel: () => null,
-                    tabBarIcon: ({ focused }) => (
-                        <Ionicons name="add" size={24} color={focused ? "black" : "gray"} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="activity"
-                options={{
-                    tabBarLabel: () => null,
-                    tabBarIcon: ({ focused }) => (
-                        <Ionicons
-                            name="heart-outline"
-                            size={24}
-                            color={focused ? "black" : "gray"}
-                        />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="[username]"
-                options={{
-                    tabBarLabel: () => null,
-                    tabBarIcon: ({ focused }) => (
-                        <Ionicons
-                            name="person-outline"
-                            size={24}
-                            color={focused ? "black" : "gray"}
-                        />
-                    ),
-                }}
-            />
-        </Tabs>
+            >
+                <Tabs.Screen
+                    name="(home)"
+                    options={{
+                        tabBarLabel: () => null,
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name="home"
+                                size={24}
+                                color={focused ? "black" : "gray"}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="search"
+                    options={{
+                        tabBarLabel: () => null,
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name="search"
+                                size={24}
+                                color={focused ? "black" : "gray"}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="add"
+                    listeners={{
+                        tabPress: (e) => {
+                            e.preventDefault();
+                            if (isLoggedIn) {
+                                router.navigate("/modal");
+                            } else {
+                                openLoginModal();
+                            }
+                        },
+                    }}
+                    options={{
+                        tabBarLabel: () => null,
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name="add"
+                                size={24}
+                                color={focused ? "black" : "gray"}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="activity"
+                    listeners={{
+                        tabPress: (e) => {
+                            if (!isLoggedIn) {
+                                e.preventDefault();
+                                openLoginModal();
+                            }
+                        },
+                    }}
+                    options={{
+                        tabBarLabel: () => null,
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name="heart-outline"
+                                size={24}
+                                color={focused ? "black" : "gray"}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="[username]"
+                    listeners={{
+                        tabPress: (e) => {
+                            if (!isLoggedIn) {
+                                e.preventDefault();
+                                openLoginModal();
+                            }
+                        },
+                    }}
+                    options={{
+                        tabBarLabel: () => null,
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name="person-outline"
+                                size={24}
+                                color={focused ? "black" : "gray"}
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="(post)/[username]/post/[postID]"
+                    options={{
+                        href: null,
+                    }}
+                />
+            </Tabs>
+            <Modal
+                visible={isLoginModalOpen}
+                transparent={true}
+                animationType="slide"
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: "flex-end",
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    }}
+                >
+                    <View style={{ backgroundColor: "white", padding: 20 }}>
+                        <Text>Login Modal</Text>
+                        <TouchableOpacity onPress={closeLoginModal}>
+                            <Ionicons name="close" size={24} color="#555" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        </>
     );
 }
