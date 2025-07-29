@@ -13,7 +13,15 @@ import type {
 import { BlurView } from "expo-blur";
 import { Slot, router, withLayoutContext } from "expo-router";
 import { useContext, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    Image,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useColorScheme
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -25,6 +33,7 @@ export const MaterialTopTabs = withLayoutContext<
 >(Navigator);
 
 export default function TabLayout() {
+    const colorScheme = useColorScheme();
     const insets = useSafeAreaInsets();
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const { user } = useContext(AuthContext);
@@ -35,9 +44,17 @@ export default function TabLayout() {
             style={[
                 styles.container,
                 { paddingTop: insets.top, paddingBottom: insets.bottom },
+                // colorScheme에 영향을 받는 스타일과 안받는 스타일을 구분해 놓는 것이 최적화에 좋음 
+                colorScheme === "dark" ? styles.containerDark : styles.containerLight,
             ]}
         >
-            <BlurView style={styles.header} intensity={70}>
+            <BlurView
+                style={[
+                    styles.header,
+                    colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+                ]}
+                intensity={colorScheme === "dark" ? 5 : 70}
+            >
                 {isLoggedIn && (
                     <Pressable
                         style={styles.menuButton}
@@ -45,7 +62,11 @@ export default function TabLayout() {
                             setIsSideMenuOpen(true);
                         }}
                     >
-                        <Ionicons name="menu" size={24} color="black" />
+                        <Ionicons
+                            name="menu"
+                            size={24}
+                            color={colorScheme === "dark" ? "gray" : "black"}
+                        />
                     </Pressable>
                 )}
                 <SideMenu
@@ -58,33 +79,50 @@ export default function TabLayout() {
                 />
                 {!isLoggedIn && (
                     <TouchableOpacity
-                        style={styles.loginButton}
+                        style={[
+                            styles.loginButton,
+                            colorScheme === "dark"
+                                ? styles.loginButtonDark
+                                : styles.loginButtonLight,
+                        ]}
                         onPress={() => {
                             console.log("loginButton onPress");
                             router.navigate(`/login`);
                         }}
                     >
-                        <Text style={styles.loginButtonText}>로그인</Text>
+                        <Text
+                            style={
+                                colorScheme === "dark"
+                                    ? styles.loginButtonTextDark
+                                    : styles.loginButtonTextLight
+                            }
+                        >
+                            로그인
+                        </Text>
                     </TouchableOpacity>
                 )}
             </BlurView>
             {isLoggedIn ? (
                 <MaterialTopTabs
                     screenOptions={{
-                        lazy: true, // 바로 렌더링하는게 아니라  넘길 때 렌더링
+                        lazy: true,
                         tabBarStyle: {
-                            backgroundColor: "white",
+                            backgroundColor: colorScheme === "dark" ? "#101010" : "white",
                             shadowColor: "transparent",
                             position: "relative",
                         },
+                        tabBarLabelStyle: {
+                            fontSize: 16,
+                            fontWeight: "bold",
+                        },
                         tabBarPressColor: "transparent",
-                        tabBarActiveTintColor: "#555",
+                        tabBarActiveTintColor: colorScheme === "dark" ? "white" : "#555",
                         tabBarIndicatorStyle: {
-                            backgroundColor: "black",
+                            backgroundColor: colorScheme === "dark" ? "white" : "black",
                             height: 1,
                         },
                         tabBarIndicatorContainerStyle: {
-                            backgroundColor: "#aaa",
+                            backgroundColor: colorScheme === "dark" ? "#aaa" : "#555",
                             position: "absolute",
                             top: 49,
                             height: 1,
@@ -108,14 +146,26 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    containerLight: {
+        backgroundColor: "white",
+    },
+    containerDark: {
+        backgroundColor: "#101010",
+    },
     header: {
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
         paddingHorizontal: 16,
+        height: 50,
+    },
+    headerLight: {
+        backgroundColor: "white",
+    },
+    headerDark: {
+        backgroundColor: "#101010",
     },
     menuButton: {
-        padding: 8,
         position: "absolute",
         left: 16,
     },
@@ -125,12 +175,20 @@ const styles = StyleSheet.create({
     },
     loginButton: {
         padding: 8,
-        backgroundColor: "black",
         borderRadius: 4,
         position: "absolute",
         right: 16,
     },
-    loginButtonText: {
+    loginButtonLight: {
+        backgroundColor: "black",
+    },
+    loginButtonDark: {
+        backgroundColor: "white",
+    },
+    loginButtonTextLight: {
         color: "white",
+    },
+    loginButtonTextDark: {
+        color: "black",
     },
 });
