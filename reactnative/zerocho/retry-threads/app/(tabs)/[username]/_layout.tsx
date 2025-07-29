@@ -16,6 +16,7 @@ import { useContext, useState } from "react";
 import {
     Image,
     Pressable,
+    Share,
     StyleSheet,
     Text,
     View,
@@ -47,8 +48,16 @@ export default function TabLayout() {
 
     const handleCloseEditModal = () => setIsEditModalVisible(false);
 
-    const handleShareProfile = () => {
+    const handleShareProfile = async () => {
         console.log("share profile");
+        try {
+            await Share.share({
+                message: `thread://@${username}`, // universal link
+                url: `thread://@${username}`,
+            });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
