@@ -3,7 +3,6 @@ import { FlashList } from "@shopify/flash-list";
 import * as Haptics from "expo-haptics";
 import { usePathname } from "expo-router";
 import { useCallback, useContext, useRef, useState } from "react";
-// Pan : drag 하는 행위
 import { PanResponder, StyleSheet, useColorScheme, View } from "react-native";
 import Animated, {
     useAnimatedScrollHandler,
@@ -13,15 +12,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { AnimationContext } from "./_layout";
 
-// Animated가 가능한 FlashList로 만들어준다.
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList<PostType>);
 
 export default function Index() {
     const colorScheme = useColorScheme();
     const path = usePathname();
     const [posts, setPosts] = useState<PostType[]>([]);
-    // useSharedValue : useRef와 같이 자주 바뀌되, 리렌더링 안되는 값들을 저장
-    // js가아니라 ui thread에서 처리함 (native 단에서 사용)
     const scrollPosition = useSharedValue(0);
     const isReadyToRefresh = useSharedValue(false);
     const { pullDownPosition } = useContext(AnimationContext);
@@ -38,7 +34,7 @@ export default function Index() {
     }, [posts, path]);
 
     const onRefresh = (done: () => void) => {
-        setPosts([]); // 리프레싱되는 걸 가시적으로 보여주기 위한 용도
+        setPosts([]);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         fetch("/posts")
             .then((res) => res.json())
@@ -57,7 +53,6 @@ export default function Index() {
         console.log("onPanRelease", isReadyToRefresh.value);
         if (isReadyToRefresh.value) {
             onRefresh(() => {
-                // withTiming : 천천히 작동시킴
                 pullDownPosition.value = withTiming(0, {
                     duration: 180,
                 });
@@ -69,7 +64,7 @@ export default function Index() {
         PanResponder.create({
             onMoveShouldSetPanResponder: () => true,
             onPanResponderMove: (event, gestureState) => {
-                const max = 120; // 120 까지만 당겨진다.
+                const max = 120;
                 pullDownPosition.value = Math.max(Math.min(gestureState.dy, max), 0);
                 console.log("pull", pullDownPosition.value);
 

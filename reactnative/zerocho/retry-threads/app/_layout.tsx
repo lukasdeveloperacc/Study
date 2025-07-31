@@ -9,10 +9,6 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Alert, Animated, StyleSheet, View } from "react-native";
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
-// 기본 splash 스크린이 사라지는 시간과 Animated.Image로 셋팅한 스플래시 스크린이 뜨는 시간에 차이가 발생하면
-// 사용자 경험에 문제가 될 수 있음
-// plugin에 있는 스플래시 스크린이 사라지지 않도록함
-// 수동으로 바로 없애줌
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
 });
@@ -44,7 +40,7 @@ function AnimatedAppLoader({
   image: number;
 }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isSplashReady, setSplashReady] = useState(false); // react logo 로딩이 끝났는지 확인 
+  const [isSplashReady, setSplashReady] = useState(false);
 
   useEffect(() => {
     async function prepare() {
@@ -104,7 +100,7 @@ function AnimatedAppLoader({
     return null;
   }
 
-  return ( // ContextAPI는 최대한 상위 에있는게 좋다.
+  return (
     <AuthContext value={{ user, login, logout, updateUser }}>
       <AnimatedSplashScreen image={image}>{children}</AnimatedSplashScreen>
     </AuthContext>
@@ -142,7 +138,7 @@ function AnimatedSplashScreen({
         }),
         // TODO: validating access token
       ]);
-      await SplashScreen.hideAsync(); // 수동으로 plugins에 있는 스플래시 스크린을 없애줌
+      await SplashScreen.hideAsync();
     } catch (e) {
       console.error(e);
     } finally {
@@ -157,14 +153,13 @@ function AnimatedSplashScreen({
 
   return (
     <View style={{ flex: 1 }}>
-      {isAppReady && children} {/* 앱이 준비되면 children을 보여주기 */}
-      { /* 앱이 준비되지 않았으면 splash screen을 보여주기 + 애니메이션 끝날 때까지 애니메이션 보여주기  */}
+      {isAppReady && children}
       {!isSplashAnimationComplete && (
         <Animated.View
           pointerEvents="none"
           style={[
             {
-              ...StyleSheet.absoluteFillObject, // 화면 꽉채우기 
+              ...StyleSheet.absoluteFillObject,
               flex: 1,
               justifyContent: "center",
               alignItems: "center",
@@ -192,7 +187,7 @@ function AnimatedSplashScreen({
 
 export default function RootLayout() {
   return (
-    <AnimatedAppLoader image={require("../assets/images/react-logo.png")}> {/* require 시 image type은 number */}
+    <AnimatedAppLoader image={require("../assets/images/react-logo.png")}>
       <StatusBar style="auto" animated hidden={false} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />

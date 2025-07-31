@@ -2,7 +2,7 @@ import { AuthContext } from "@/app/_layout";
 import Post from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, usePathname } from "expo-router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     Image,
     Pressable,
@@ -19,6 +19,15 @@ export default function Reposts() {
     console.log(pathname);
     const { user } = useContext(AuthContext);
     const [threads, setThreads] = useState<any[]>([]);
+
+    useEffect(() => {
+        setThreads([]);
+        fetch(`/users/${username?.slice(1)}/reposts`)
+            .then((res) => res.json())
+            .then((data) => {
+                setThreads(data.posts);
+            });
+    }, [username]);
 
     const onEndReached = () => {
         console.log(
