@@ -41,4 +41,5 @@ app-example
 .vscode/
 
 google-services.json
-threads-clone-*.json
+retry-threads-firebase-adminsdk-fbsvc-7bb7593f4c.json
+

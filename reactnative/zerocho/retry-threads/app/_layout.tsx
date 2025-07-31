@@ -1,15 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Asset } from "expo-asset";
 import Constants from "expo-constants";
+import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { Stack } from "expo-router";
+import { Href, router, Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import * as Updates from "expo-updates";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Alert, Animated, Linking, StyleSheet, View } from "react-native";
 import Toast, { BaseToast } from "react-native-toast-message";
-
 // First, set the handler that will cause the notification
 // to show the alert
 Notifications.setNotificationHandler({
@@ -126,25 +127,25 @@ function AnimatedAppLoader({
   );
 }
 
-// async function sendPushNotification(expoPushToken: string) {
-//   const message = {
-//     to: expoPushToken,
-//     sound: "default",
-//     title: "Original Title",
-//     body: "And here is the body!",
-//     data: { someData: "goes here" },
-//   };
+async function sendPushNotification(expoPushToken: string) {
+  const message = {
+    to: expoPushToken,
+    sound: "default",
+    title: "Original Title",
+    body: "And here is the body!",
+    data: { someData: "goes here" },
+  };
 
-//   await fetch("https://exp.host/--/api/v2/push/send", {
-//     method: "POST",
-//     headers: {
-//       Accept: "application/json",
-//       "Accept-encoding": "gzip, deflate",
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(message),
-//   });
-// }
+  await fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Accept-encoding": "gzip, deflate",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(message),
+  });
+}
 
 function AnimatedSplashScreen({
   children,
@@ -157,7 +158,13 @@ function AnimatedSplashScreen({
   const [isSplashAnimationComplete, setAnimationComplete] = useState(false);
   const animation = useRef(new Animated.Value(1)).current;
   const { updateUser } = useContext(AuthContext);
-  // const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+
+  const { currentlyRunning, isUpdateAvailable, isUpdatePending } =
+    Updates.useUpdates();
+  console.log("currentlyRunning", currentlyRunning);
+  console.log("isUpdateAvailable", isUpdateAvailable);
+  console.log("isUpdatePending", isUpdatePending);
 
   useEffect(() => {
     if (isAppReady) {
@@ -169,6 +176,29 @@ function AnimatedSplashScreen({
     }
   }, [isAppReady]);
 
+  async function onFetchUpdateAsync() {
+    try {
+      if (!__DEV__) {
+        const update = await Updates.checkForUpdateAsync();
+
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          Alert.alert("Update available", "Please update your app", [
+            {
+              text: "Update",
+              onPress: () => Updates.reloadAsync(),
+            },
+            { text: "Cancel", style: "cancel" },
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      // You can also add an alert() to see the error message in case of an error when fetching updates.
+      alert(`Error fetching latest Expo update: ${error}`);
+    }
+  }
+
   const onImageLoaded = async () => {
     try {
       // 데이터 준비
@@ -176,31 +206,22 @@ function AnimatedSplashScreen({
         AsyncStorage.getItem("user").then((user) => {
           updateUser?.(user ? JSON.parse(user) : null);
         }),
+        onFetchUpdateAsync(),
         // TODO: validating access token
       ]);
       await SplashScreen.hideAsync();
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") {
         return Linking.openSettings();
-      } else {
-        console.log("granted");
       }
-      const notification = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "App is ready",
-          body: "Try uplaoding new thread"
-        },
-        trigger: null
-      })
-      console.log("notifiaction", notification);
-      // const token = await Notifications.getExpoPushTokenAsync({
-      //   projectId:
-      //     Constants?.expoConfig?.extra?.eas?.projectId ??
-      //     Constants?.easConfig?.projectId,
-      // });
-      // console.log("token", token);
+      const token = await Notifications.getExpoPushTokenAsync({
+        projectId:
+          Constants?.expoConfig?.extra?.eas?.projectId ??
+          Constants?.easConfig?.projectId,
+      });
+      console.log("token", token);
       // TODO: save token to server
-      // setExpoPushToken(token.data);
+      setExpoPushToken(token.data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -208,11 +229,12 @@ function AnimatedSplashScreen({
     }
   };
 
-  // useEffect(() => {
-  //   if (expoPushToken && Device.isDevice) {
-  //     sendPushNotification(expoPushToken);
-  //   }
-  // }, [expoPushToken]);
+  useEffect(() => {
+    if (expoPushToken && Device.isDevice) {
+      Alert.alert("sendPushNotification", expoPushToken);
+      sendPushNotification(expoPushToken);
+    }
+  }, [expoPushToken]);
 
   const rotateValue = animation.interpolate({
     inputRange: [0, 1],
@@ -253,7 +275,44 @@ function AnimatedSplashScreen({
   );
 }
 
+function useNotificationObserver() {
+  useEffect(() => {
+    let isMounted = true;
+
+    function redirect(notification: Notifications.Notification) {
+      const url = notification.request.content.data?.url as string;
+      if (url && url.startsWith("retrythreadc://")) {
+        Alert.alert("redirect to url", url);
+        router.push(url.replace("retrythreadc://", "/") as Href); // retrythreadc://@zerocho -> /@zerocho
+        // Linking.openURL(url);
+      }
+    }
+
+    // 앱이 완전 종료되어있을 때 노티피케이션에 대응
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (!isMounted || !response?.notification) {
+        return;
+      }
+      redirect(response?.notification);
+    });
+
+    // 포그라운드, 백그라운드 노티피케이션에 대응
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        redirect(response.notification);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.remove();
+    };
+  }, []);
+}
+
 export default function RootLayout() {
+  useNotificationObserver();
+
   const toastConfig = {
     customToast: (props: any) => (
       <BaseToast
