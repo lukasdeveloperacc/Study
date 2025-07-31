@@ -1,6 +1,7 @@
 import "expo-router/entry";
 
 import { faker } from "@faker-js/faker";
+import * as Device from "expo-device";
 import {
   belongsTo,
   createServer,
@@ -11,7 +12,6 @@ import {
   RestSerializer,
   Server,
 } from "miragejs";
-
 declare global {
   interface Window {
     server: Server;
@@ -20,7 +20,7 @@ declare global {
 
 let zerocho;
 
-if (__DEV__) {
+if (__DEV__ && !Device.isDevice) {
   if (window.server) {
     window.server.shutdown();
   }
