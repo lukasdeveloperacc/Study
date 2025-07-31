@@ -4,6 +4,9 @@ import { usePathname } from "expo-router";
 import { useCallback, useState } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 
+// 미리 데이터를 불러오기위해
+// 코드 중복(단점)은 불러오지만 index에서 following을 만들어준다.
+// useEffect도 사라진다. (장점)
 export default function Following() {
     const colorScheme = useColorScheme();
     const path = usePathname();
