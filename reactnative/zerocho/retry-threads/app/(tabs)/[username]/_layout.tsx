@@ -1,28 +1,29 @@
-import { AuthContext, User } from "@/app/_layout";
-import EditProfileModal from "@/components/EditProfileModal";
-import SideMenu from "@/components/SideMenu";
-import { Ionicons } from "@expo/vector-icons";
 import {
     type MaterialTopTabNavigationEventMap,
     type MaterialTopTabNavigationOptions,
     createMaterialTopTabNavigator,
 } from "@react-navigation/material-top-tabs";
+import { withLayoutContext, useLocalSearchParams } from "expo-router";
 import type {
     ParamListBase,
     TabNavigationState,
 } from "@react-navigation/native";
-import { useLocalSearchParams, withLayoutContext } from "expo-router";
-import { useContext, useEffect, useState } from "react";
 import {
-    Image,
     Pressable,
-    Share,
-    StyleSheet,
-    Text,
     View,
-    useColorScheme
+    Image,
+    Text,
+    useColorScheme,
+    Share,
 } from "react-native";
+import { useEffect, useState } from "react";
+import { AuthContext, User } from "@/app/_layout";
+import { useContext } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import SideMenu from "@/components/SideMenu";
+import EditProfileModal from "@/components/EditProfileModal";
 const { Navigator } = createMaterialTopTabNavigator();
 
 export const MaterialTopTabs = withLayoutContext<
@@ -68,8 +69,8 @@ export default function TabLayout() {
         console.log("share profile");
         try {
             await Share.share({
-                message: `thread://@${username}`,
-                url: `thread://@${username}`,
+                message: `retrythreads://@${username}`,
+                url: `retrythreads://@${username}`,
             });
         } catch (error) {
             console.log(error);

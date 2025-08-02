@@ -1,21 +1,21 @@
-import NotFound from "@/app/+not-found";
-import ActivityItem from "@/components/Activity";
-import SideMenu from "@/components/SideMenu";
-import { Ionicons } from "@expo/vector-icons";
-import { usePathname, useRouter } from "expo-router";
-import { useContext, useState } from "react";
 import {
-    Image,
     Pressable,
-    ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
-    useColorScheme,
     View,
+    StyleSheet,
+    useColorScheme,
+    Image,
+    ScrollView,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePathname, useRouter } from "expo-router";
+import NotFound from "@/app/+not-found";
+import { Ionicons } from "@expo/vector-icons";
+import SideMenu from "@/components/SideMenu";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../_layout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ActivityItem from "@/components/Activity";
 
 export default function Index() {
     const router = useRouter();
@@ -77,7 +77,11 @@ export default function Index() {
                     onClose={() => setIsSideMenuOpen(false)}
                 />
             </View>
-            <View style={styles.tabBar}>
+            <ScrollView
+                horizontal
+                style={styles.tabBar}
+                contentContainerStyle={styles.tabBarContainer}
+            >
                 <View>
                     <TouchableOpacity
                         style={[
@@ -260,7 +264,7 @@ export default function Index() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
             <ScrollView>
                 <ActivityItem
                     id="1"
@@ -378,6 +382,12 @@ const styles = StyleSheet.create({
         color: "white",
     },
     tabBar: {
+        padding: 0,
+        margin: 0,
+        flexGrow: 0,
+    },
+    tabBarContainer: {
+        height: 45,
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: 10,

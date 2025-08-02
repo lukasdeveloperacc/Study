@@ -1,5 +1,6 @@
 import Post, { type Post as PostType } from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
+import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
 import { usePathname } from "expo-router";
 import { useCallback, useContext, useRef, useState } from "react";
@@ -14,7 +15,7 @@ import { AnimationContext } from "./_layout";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList<PostType>);
 
-export default function Following() {
+export default function Index() {
     const colorScheme = useColorScheme();
     const path = usePathname();
     const [posts, setPosts] = useState<PostType[]>([]);
@@ -24,7 +25,9 @@ export default function Following() {
 
     const onEndReached = useCallback(() => {
         console.log("onEndReached", posts.at(-1)?.id);
-        fetch(`/posts?type=following&cursor=${posts.at(-1)?.id}`)
+        fetch(
+            `${Constants.expoConfig?.extra?.apiUrl}/posts?cursor=${posts.at(-1)?.id}`
+        )
             .then((res) => res.json())
             .then((data) => {
                 if (data.posts.length > 0) {
@@ -36,7 +39,7 @@ export default function Following() {
     const onRefresh = (done: () => void) => {
         setPosts([]);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        fetch(`/posts?type=following`)
+        fetch(`${Constants.expoConfig?.extra?.apiUrl}/posts`)
             .then((res) => res.json())
             .then((data) => {
                 setPosts(data.posts);

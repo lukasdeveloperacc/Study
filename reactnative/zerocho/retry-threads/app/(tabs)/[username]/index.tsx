@@ -1,16 +1,16 @@
-import { AuthContext } from "@/app/_layout";
-import Post from "@/components/Post";
-import { FlashList } from "@shopify/flash-list";
-import { router, useLocalSearchParams, usePathname } from "expo-router";
-import { useContext, useEffect, useState } from "react";
 import {
-    Image,
-    Pressable,
-    StyleSheet,
     Text,
-    useColorScheme,
     View,
+    StyleSheet,
+    useColorScheme,
+    Pressable,
+    Image,
 } from "react-native";
+import { usePathname, useLocalSearchParams, router } from "expo-router";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/app/_layout";
+import { FlashList } from "@shopify/flash-list";
+import Post from "@/components/Post";
 
 const Header = () => {
     const { user } = useContext(AuthContext);

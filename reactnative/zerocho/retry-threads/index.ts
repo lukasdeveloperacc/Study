@@ -20,7 +20,6 @@ declare global {
 
 let zerocho;
 
-// console.log("Device", Device.isDevice, " ", Device);
 if (__DEV__ && !Device.isDevice) {
   if (window.server) {
     window.server.shutdown();
