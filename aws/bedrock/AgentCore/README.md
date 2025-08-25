@@ -10,13 +10,23 @@ uv pip compile pyproject.toml -o requirements.txt
 ```bash
 uv run agentcore configure --entrypoint agent_core.py --region us-east-1
 ```
+- Need role arn
 
 # Launch
 ```bash
-uv run agentcore launch
+uv run agentcore launch -l --env OPENAI_API_KEY=...
 ```
+- locally
+
+```bash
+uv run agentcore launch --env OPENAI_API_KEY=...
+```
+- cloud
 
 # Test
 ```bash
 uv run agentcore invoke '{"prompt": "Hello"}'
+
+{"qa": {"answer": "Hello! How can I assist you today?"}}
 ```
+- test
