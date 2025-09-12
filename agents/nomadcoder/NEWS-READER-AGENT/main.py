@@ -5,7 +5,7 @@ dotenv.load_dotenv()
 from crewai import Agent, Crew, Task
 from crewai.project import CrewBase, agent, task, crew
 
-from tools import count_letters
+from tools import count_letters, search_tool, scrape_tool
 
 @CrewBase
 class TranslatorCrew:
@@ -59,7 +59,8 @@ class NewsReaderAgent:
     @agent
     def news_hunter_agent(self):
         return Agent(
-            config = self.agents_config["news_hunter_agent"]
+            config = self.agents_config["news_hunter_agent"],
+            tools=[search_tool, scrape_tool]
         )
 
     @agent
@@ -101,4 +102,8 @@ class NewsReaderAgent:
             verbose=True
         )
 
-NewsReaderAgent().crew().kickoff()
+result = NewsReaderAgent().crew().kickoff(inputs={"topic": "Cambodia Thailand War."})
+
+# Promatically how to access the output of each task
+for task_output in result.task_outputs:
+    print(task_output)

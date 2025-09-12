@@ -17,6 +17,7 @@ news_hunter_agent:
     always cross-reference information from multiple outlets before considering it reliable.
   verbose: true
   inject_date: true # 가끔 모델이 오래된 것일 수 있는데 현재 날짜를 넣어주면 현재 시간대를 인식하여 최신 뉴스를 볼 수 있으므로 더 나은 답변이 나올 수 있다.
+  llm: openai/o4-mini-2025-04-16
 
 summarizer_agent:
   role: >
@@ -65,3 +66,4 @@ curator_agent:
     information with proper context and analysis.
   verbose: true
   inject_date: true
+  llm: openai/o4-mini-2025-04-16
