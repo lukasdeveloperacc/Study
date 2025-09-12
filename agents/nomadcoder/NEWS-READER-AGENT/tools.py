@@ -9,3 +9,4 @@ def count_letters(sentence: str):
     The output is a number.
     """
     return len(sentence)
+
