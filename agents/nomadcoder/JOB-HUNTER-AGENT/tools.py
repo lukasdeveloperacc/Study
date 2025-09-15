@@ -6,7 +6,11 @@ import os, re
 @tool
 def web_search_tool(query: str) -> str:
     """
-    Use this tool to search for job listings on the web.
+    Web Search Tool.
+    Args:
+        query (str): The query to search the web for.
+    Returns:
+        A list of search results with the website content in Markdown format..
     """
     app = FirecrawlApp(api_key=os.getenv("FIRECRAWL_API_KEY"))
 
