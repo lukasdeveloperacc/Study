@@ -1,35 +1,15 @@
 import streamlit as st
-import time
 
-st.write("Hello World!")
+if "is_admin" not in st.session_state:
+    st.session_state["is_admin"] = False
 
-st.button("Click Me")
+st.header("Hello !")
 
-st.text_input("Write your API KEY", max_chars=20)
+name = st.text_input("What is your name ?")
 
-with st.sidebar:
-    st.badge("Badge 1")
+if name:
+    st.write(f"Hello {name}")
+    st.session_state["is_admin"] = True
 
-tab1, tab2, tab3 = st.tabs(["Agent", "Chat", "Output"])
+print(st.session_state["is_admin"])
 
-with tab1:
-    st.header("Agent")
-with tab2:
-    st.header("Chat")
-with tab3:
-    st.header("Output")
-    
-with st.chat_message("ai"):
-    st.text("Hello !")
-    with st.status("Agent is using tool") as status:
-        time.sleep(1)
-        status.update(label="Agent is searching the web...")
-        time.sleep(2)
-        status.update(label="Agent is reading the page...")
-        time.sleep(3)
-        status.update(state="complete")
-        
-with st.chat_message("human"):
-    st.text("Hello !!")
-
-st.chat_input("Write a message for the assistant.", accept_file=True)
