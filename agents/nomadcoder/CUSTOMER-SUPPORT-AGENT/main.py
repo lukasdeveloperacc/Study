@@ -26,6 +26,8 @@ if "session" not in st.session_state:
     )
 session = st.session_state["session"]
 
+if "agent" not in st.session_state:
+    st.session_state["agent"] = triage_agent
 
 async def paint_history():
     messages = await session.get_items()
@@ -52,7 +54,7 @@ async def run_agent(message):
 
         try:
             stream = Runner.run_streamed(
-                triage_agent,
+                st.session_state["agent"],
                 message,
                 session=session,
                 context=user_account_ctx, # It doesn't transfer the context to the agent
@@ -64,6 +66,13 @@ async def run_agent(message):
                     if event.data.type == "response.output_text.delta":
                         response += event.data.delta
                         text_placeholder.write(response.replace("$", "\$"))
+
+                elif event.type == "agent_updated_stream_event":
+                    if st.session_state["agent"] != event.new_agent:
+                        st.write(f"🤖 Transferred from {st.session_state['agent'].name} to {event.new_agent.name}")
+                        st.session_state["agent"] = event.new_agent # Update transferred agent in the session state
+                        text_placeholder = st.empty()
+                        response = ""
 
         except InputGuardrailTripwireTriggered:
             st.write("I can't help you that")
