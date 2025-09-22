@@ -4,8 +4,9 @@ dotenv.load_dotenv()
 from openai import OpenAI
 import asyncio
 import streamlit as st
-from agents import Runner, SQLiteSession, function_tool, RunContextWrapper
+from agents import InputGuardrailTripwireTriggered, Runner, SQLiteSession, function_tool, RunContextWrapper
 from models import UserAccountContext
+from my_agents.triage_agent import triage_agent
 
 
 
@@ -49,19 +50,23 @@ async def run_agent(message):
 
         st.session_state["text_placeholder"] = text_placeholder
 
-        stream = Runner.run_streamed(
-            agent,
-            message,
-            session=session,
-            context=user_account_ctx, # It doesn't transfer the context to the agent
-        )
+        try:
+            stream = Runner.run_streamed(
+                triage_agent,
+                message,
+                session=session,
+                context=user_account_ctx, # It doesn't transfer the context to the agent
+            )
 
-        async for event in stream.stream_events():
-            if event.type == "raw_response_event":
+            async for event in stream.stream_events():
+                if event.type == "raw_response_event":
 
-                if event.data.type == "response.output_text.delta":
-                    response += event.data.delta
-                    text_placeholder.write(response.replace("$", "\$"))
+                    if event.data.type == "response.output_text.delta":
+                        response += event.data.delta
+                        text_placeholder.write(response.replace("$", "\$"))
+
+        except InputGuardrailTripwireTriggered:
+            st.write("I can't help you that")
 
 
 message = st.chat_input(
