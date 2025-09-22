@@ -8,13 +8,6 @@ from agents import Runner, SQLiteSession, function_tool, RunContextWrapper
 from models import UserAccountContext
 
 
-@function_tool
-def get_user_tier(wrapper: RunContextWrapper[UserAccountContext]):
-    # context 사용, 업데이트 가능
-    return (
-        f"The user {wrapper.context.customer_id} has a {wrapper.context.tier} account."
-    )
-
 
 client = OpenAI()
 
