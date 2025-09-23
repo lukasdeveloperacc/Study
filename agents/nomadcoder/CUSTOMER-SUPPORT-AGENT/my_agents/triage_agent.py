@@ -24,6 +24,8 @@ async def off_topic_guardrail(wrapper: RunContextWrapper[UserAccountContext], ag
 
 def dynamic_triage_agent_instructions(wrapper: RunContextWrapper[UserAccountContext], agent: Agent[UserAccountContext]):
     return f"""
+    SPEAK TO THE USER IN ENGLISH.
+    
     {RECOMMENDED_PROMPT_PREFIX}
 
     You are a customer support agent. You ONLY help customers with their questions about their User Account, Billing, Orders, or Technical Support.

@@ -5,13 +5,14 @@ import asyncio
 import streamlit as st
 import numpy as np
 import wave, io
+import sounddevice as sd
 
 from agents import InputGuardrailTripwireTriggered, OutputGuardrailTripwireTriggered, Runner, SQLiteSession, function_tool, RunContextWrapper, Agent
-from agents.voice import AudioInput
+from agents.voice import AudioInput, VoicePipeline
 from models import UserAccountContext
 from my_agents.triage_agent import triage_agent
 from openai import OpenAI
-
+from workflow import CustomWorkflow
 
 
 client = OpenAI()
@@ -50,12 +51,19 @@ async def run_agent(audio_input):
         # create custom workflow
         # create the pipeline
 
-        stream = Runner.run_streamed(
-            st.session_state["agent"],
-            audio_input,
-            session=session,
-                context=user_account_ctx, # It doesn't transfer the context to the agent
-            )   
+        workflow = CustomWorkflow(context=user_account_ctx)
+        pipeline = VoicePipeline(workflow=workflow)
+        status_container.update(label="Running workflow", state="running")
+
+        result = await pipeline.run(audio)
+        player = sd.OutputStream(samplerate=24000, channels=1, dtype=np.int16)
+        player.start()
+
+        status_container.update(state="complete")
+
+        async for event in result.stream():
+            if event.type == "voice_stream_event_audio":
+                player.write(event.audio)
 
     except InputGuardrailTripwireTriggered:
         st.write("I can't help you that.")
