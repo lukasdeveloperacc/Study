@@ -4,7 +4,7 @@ dotenv.load_dotenv()
 from openai import OpenAI
 import asyncio
 import streamlit as st
-from agents import InputGuardrailTripwireTriggered, Runner, SQLiteSession, function_tool, RunContextWrapper
+from agents import InputGuardrailTripwireTriggered, Runner, SQLiteSession, function_tool, RunContextWrapper, Agent
 from models import UserAccountContext
 from my_agents.triage_agent import triage_agent
 
@@ -68,10 +68,11 @@ async def run_agent(message):
                         text_placeholder.write(response.replace("$", "\$"))
 
                 elif event.type == "agent_updated_stream_event":
-                    if st.session_state["agent"] != event.new_agent:
-                        st.write(f"🤖 Transferred from {st.session_state['agent'].name} to {event.new_agent.name}")
-                        st.session_state["agent"] = event.new_agent # Update transferred agent in the session state
+                    if st.session_state["agent"].name != event.new_agent.name:
+                        st.write(f"🤖 Transfered from {st.session_state["agent"].name} to {event.new_agent.name}")
+                        st.session_state["agent"] = event.new_agent
                         text_placeholder = st.empty()
+                        st.session_state["text_placeholder"] = text_placeholder
                         response = ""
 
         except InputGuardrailTripwireTriggered:
