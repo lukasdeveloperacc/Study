@@ -48,6 +48,7 @@ def ensure_role():
         "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess",
         "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
         "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
+        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
     ]
     for policy_arn in base_policies:
         try:
