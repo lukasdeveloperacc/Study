@@ -1,21 +1,23 @@
 from dotenv import load_dotenv
-from botocore.exceptions import ClientError
-import boto3
-import os
 
 load_dotenv()
 
+from botocore.exceptions import ClientError
+
+import boto3
+import os
+
+
 client = boto3.client("bedrock-agentcore-control", region_name="us-east-1")
 
-agent_runtime_name = "luke_mcp"
-container_uri = os.getenv("MCP_CONTAINER_URI")
-role_arn = os.getenv("AGENT_ROLE_ARN")
-openai_api_key = os.getenv("OPENAI_API_KEY")
+agent_runtime_name = os.getenv("AGENT_NAME")
+container_uri = os.getenv("CONTAINER_URI")
+role_arn = os.getenv("ROLE_ARN")
 server_protocol = "MCP"  # MCP | HTTP
 
 # Auth of Cognito
-discovery_url = os.getenv("MCP_DISCOVERY_URL")
-client_id = os.getenv("MCP_CLIENT_ID")
+discovery_url = os.getenv("COGNITO_DISCOVERY_URL")
+client_id = os.getenv("COGNITO_CLIENT_ID")
 
 try:
     response = client.create_agent_runtime(
@@ -25,7 +27,6 @@ try:
         },
         networkConfiguration={"networkMode": "PUBLIC"},
         roleArn=role_arn,
-        environmentVariables={"OPENAI_API_KEY": openai_api_key},
         protocolConfiguration={"serverProtocol": server_protocol},
         authorizerConfiguration={
             "customJWTAuthorizer": {
@@ -51,7 +52,6 @@ except ClientError as e:
             },
             networkConfiguration={"networkMode": "PUBLIC"},
             roleArn=role_arn,
-            environmentVariables={"OPENAI_API_KEY": openai_api_key},
             protocolConfiguration={"serverProtocol": server_protocol},
             authorizerConfiguration={
                 "customJWTAuthorizer": {

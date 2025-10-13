@@ -114,3 +114,9 @@ docker buildx build -f Dockerfile.without_starter_toolkit --platform linux/arm64
 aws ecr describe-images --repository-name <repo_name> --region us-east-1
 ```
 - validation
+
+# MCP
+## Deploy
+```bash
+uv run deploy_mcp.py
+```
