@@ -1,0 +1,8 @@
+.venv/
+.env
+.mypy_cache
+
+__pycache__/
+build/
+dist/
+wheels/
