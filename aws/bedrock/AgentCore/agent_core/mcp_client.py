@@ -4,54 +4,24 @@ load_dotenv()
 
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
+from agent_core.mcp.utils import get_token
 
 import asyncio
 import os
 import sys
-import boto3
 
 
 async def remote_main():
-    role_arn = os.getenv("ROLE_ARN")
     agent_runtime_name = os.getenv("AGENT_NAME")
     region = os.getenv("REGION")
 
-    cognito = boto3.client("cognito-idp", region_name=region)
-    print(os.getenv("COGNITO_USER_POOL_ID"))
-    print(os.getenv("COGNITO_CLIENT_ID"))
-    print(os.getenv("COGNITO_USERNAME"))
-    print(os.getenv("COGNITO_PASSWORD"))
-    try:
-        # 3️⃣ 유저 생성 (임시 비밀번호)
-        cognito.admin_create_user(
-            UserPoolId=os.getenv("COGNITO_USER_POOL_ID"),
-            Username=os.getenv("COGNITO_USERNAME", "luke"),
-            TemporaryPassword=os.getenv("COGNITO_PASSWORD", "1234"),
-            MessageAction="SUPPRESS",
-        )
-        print(f"✅ Created temporary user: {os.getenv("COGNITO_USERNAME", "luke")}")
-
-        # 4️⃣ 비밀번호를 영구 비밀번호로 변경
-        cognito.admin_set_user_password(
-            UserPoolId=os.getenv("COGNITO_USER_POOL_ID"),
-            Username=os.getenv("COGNITO_USERNAME", "luke"),
-            Password=os.getenv("COGNITO_PASSWORD", "1234"),
-            Permanent=True,
-        )
-        print("✅ Set permanent password")
-
-    except Exception as e:
-        print(f"⚠️ Failed to create user: {e}")
-
-    auth_resp = cognito.initiate_auth(
-        ClientId=os.getenv("COGNITO_CLIENT_ID"),
-        AuthFlow="USER_PASSWORD_AUTH",
-        AuthParameters={
-            "USERNAME": os.getenv("COGNITO_USERNAME", "luke"),
-            "PASSWORD": os.getenv("COGNITO_PASSWORD", "1234"),
-        },
+    bearer_token = get_token(
+        os.getenv("COGNITO_USER_POOL_ID"),
+        os.getenv("COGNITO_USERNAME"),
+        os.getenv("COGNITO_PASSWORD"),
+        os.getenv("COGNITO_CLIENT_ID"),
+        os.getenv("REGION"),
     )
-    bearer_token = auth_resp["AuthenticationResult"]["AccessToken"]
     print(f"✅ Got Access Token: {bearer_token[:30]}...")
 
     if not agent_runtime_name or not bearer_token:

@@ -24,6 +24,11 @@ docker tag ${DOCKER_IMAGE_NAME}:latest ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${DOCKER_IMAGE_NAME}:latest
 ```
 
+### Deploy
+```bash
+uv run agent_core/runtime_deploy.py
+```
+
 ## AgentCore MCP
 ### Docker Image Push
 ```bash
@@ -48,4 +53,14 @@ DOCKER_IMAGE_NAME=luke_mcp
 docker build --platform linux/arm64 -f agent_core/Dockerfile.mcp -t ${DOCKER_IMAGE_NAME}:latest .
 docker tag ${DOCKER_IMAGE_NAME}:latest ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${DOCKER_IMAGE_NAME}:latest
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${DOCKER_IMAGE_NAME}:latest
+```
+
+### Deploy
+```bash
+uv run agent_core/mcp_deploy.py
+```
+
+### Test
+```bash
+uv run agent_core/mcp_client.py
 ```
