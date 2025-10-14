@@ -9,4 +9,4 @@ RUN uv sync --frozen --no-cache
 COPY agent_core/mcp_server.py ./agent_core/mcp_server.py
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "agent_core.mcp_server.py"]
+CMD ["uv", "run", "agent_core/mcp_server.py"]
