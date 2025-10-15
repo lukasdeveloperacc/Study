@@ -17,6 +17,7 @@ dependencies = [
     { name = "langchain-mcp-adapters" },
     { name = "langchain-openai" },
     { name = "langgraph" },
+    { name = "langgraph-checkpoint-aws" },
     { name = "mcp" },
     { name = "pydantic" },
     { name = "python-dotenv" },
@@ -35,6 +36,7 @@ requires-dist = [
     { name = "langchain-mcp-adapters", specifier = ">=0.1.11" },
     { name = "langchain-openai", specifier = ">=0.3.31" },
     { name = "langgraph", specifier = ">=0.6.6" },
+    { name = "langgraph-checkpoint-aws", specifier = ">=0.2.0" },
     { name = "mcp", specifier = ">=1.15.0" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
@@ -717,6 +719,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/73/3e/d00eb2b56c3846a0cabd2e5aa71c17a95f882d4f799a6ffe96a19b55eba9/langgraph_checkpoint-2.1.1.tar.gz", hash = "sha256:72038c0f9e22260cb9bff1f3ebe5eb06d940b7ee5c1e4765019269d4f21cf92d", size = 136256, upload-time = "2025-07-17T13:07:52.411Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4c/dd/64686797b0927fb18b290044be12ae9d4df01670dce6bb2498d5ab65cb24/langgraph_checkpoint-2.1.1-py3-none-any.whl", hash = "sha256:5a779134fd28134a9a83d078be4450bbf0e0c79fdf5e992549658899e6fc5ea7", size = 43925, upload-time = "2025-07-17T13:07:51.023Z" },
+]
+
+[[package]]
+name = "langgraph-checkpoint-aws"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "boto3" },
+    { name = "langgraph" },
+    { name = "langgraph-checkpoint" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/da/79219b54cd20307560127749d945948738ced8c59171d734c8bd7c41ee89/langgraph_checkpoint_aws-0.2.0.tar.gz", hash = "sha256:6dda5e52639d1402f11d8a44355acd6f4aba134950887463a4bccd5b88e3e73e", size = 29627, upload-time = "2025-10-01T20:49:23.066Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/92/9d67861ce42948fed1f7275ca8200cc22b17a8f31805039209073e72d978/langgraph_checkpoint_aws-0.2.0-py3-none-any.whl", hash = "sha256:7c3a3c8bc2ef2a5b746367770592dceca7668a2a289ed2812b985f56c722f045", size = 36653, upload-time = "2025-10-01T20:49:21.793Z" },
 ]
 
 [[package]]
