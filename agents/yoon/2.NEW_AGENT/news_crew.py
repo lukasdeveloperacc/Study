@@ -1,6 +1,7 @@
 from crewai import Crew, Agent, Task
 from crewai.project import CrewBase, task, agent, crew
 from env import OPENAI_API_KEY
+from tools import web_search_tool, global_news_rss_tool, korean_news_rss_tool
 
 import os
 
@@ -25,7 +26,7 @@ class NewsCrew:
             """,
             llm="openai/o4-mini",
             verbose=True,
-            tools=[],
+            tools=[korean_news_rss_tool, global_news_rss_tool],
         )
 
     @task
@@ -119,7 +120,7 @@ class NewsCrew:
             """,
             llm="openai/o4-mini",
             verbose=True,
-            tools=[],
+            tools=[web_search_tool],
         )
 
     @task
@@ -300,3 +301,6 @@ class NewsCrew:
             ],
             verbose=True,
         )
+
+news_crew = NewsCrew()
+news_crew.crew().kickoff()
