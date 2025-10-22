@@ -4,6 +4,9 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from langchain.chat_models import init_chat_model
+from dotenv import load_dotenv
+
+load_dotenv()
 
 llm = init_chat_model("openai:gpt-4o-mini")
 
