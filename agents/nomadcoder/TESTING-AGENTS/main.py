@@ -52,9 +52,3 @@ graph_builder.add_edge(assign_priority.__name__, generate_response.__name__)
 graph_builder.add_edge(generate_response.__name__, END)
 
 graph = graph_builder.compile()
-
-result = graph.invoke({"email": "i need to talk to you urgently"})
-
-print("Start")
-print(result)
-print("End")
