@@ -15,9 +15,15 @@ histroy_agent = RemoteA2aAgent(
     agent_card=f"http://127.0.0.1:8001{AGENT_CARD_WELL_KNOWN_PATH}",
 )
 
+philosophy_agent = RemoteA2aAgent(
+    name="PhilosophyAgent",
+    description="An agent that can help students with their philosophy homework",
+    agent_card=f"http://127.0.0.1:8002{AGENT_CARD_WELL_KNOWN_PATH}",
+)
+
 root_agent = Agent(
     name="StudentHelperAgent",
     description="An agent that can help students with their homework",
     model=LiteLlm("openai/gpt-4o"),
-    sub_agents=[histroy_agent],
+    sub_agents=[histroy_agent, philosophy_agent],
 )
