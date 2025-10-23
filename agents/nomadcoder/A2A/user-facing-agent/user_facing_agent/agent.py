@@ -4,11 +4,20 @@ load_dotenv()
 
 from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
+from google.adk.agents.remote_a2a_agent import (
+    RemoteA2aAgent,
+    AGENT_CARD_WELL_KNOWN_PATH,
+)
 
+histroy_agent = RemoteA2aAgent(
+    name="HistoryAgent",
+    description="An agent that can help students with their history homework",
+    agent_card=f"http://127.0.0.1:8001{AGENT_CARD_WELL_KNOWN_PATH}",
+)
 
 root_agent = Agent(
     name="StudentHelperAgent",
     description="An agent that can help students with their homework",
     model=LiteLlm("openai/gpt-4o"),
-    sub_agents=[],
+    sub_agents=[histroy_agent],
 )
