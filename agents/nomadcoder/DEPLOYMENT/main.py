@@ -14,6 +14,10 @@ client = AsyncOpenAI()
 class CreateConversationResponse(BaseModel):
     conversation_id: str
 
+@app.get("/")
+def hello_world():
+    return {"message": "hello world"}
+
 @app.post("/conversations")
 async def create_conversation() -> CreateConversationResponse:
     conversation = await client.conversations.create()
