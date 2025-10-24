@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 from agents import Agent, Runner
@@ -35,3 +36,33 @@ async def create_message(conversation_id: str, message_input: CreateMessageInput
 
     return CreateMessageOutput(answer=answer.final_output)
 
+@app.post("/conversations/{conversation_id}/message-stream")
+async def create_message(conversation_id: str, message_input: CreateMessageInput) -> CreateMessageOutput:
+    async def event_generator():
+        events = Runner.run_streamed(
+            starting_agent=agent, 
+            input=message_input.question, 
+            conversation_id=conversation_id
+        )
+
+        async for event in events.stream_events():
+            if event.type == "raw_response_event" and event.data.type == "response.output_text.delta":
+                yield event.data.delta
+
+    return StreamingResponse(event_generator(), media_type="text/plain")
+
+@app.post("/conversations/{conversation_id}/message-stream-all")
+async def create_message(conversation_id: str, message_input: CreateMessageInput) -> CreateMessageOutput:
+    async def event_generator():
+        events = Runner.run_streamed(
+            starting_agent=agent, 
+            input=message_input.question, 
+            conversation_id=conversation_id
+        )
+
+        async for event in events.stream_events():
+            # Filter for text events
+            if event.type == "raw_response_event" and event.data.type == "response.output_text.delta":
+                yield f"{event.data.to_json()}"
+
+    return StreamingResponse(event_generator(), media_type="text/plain")
