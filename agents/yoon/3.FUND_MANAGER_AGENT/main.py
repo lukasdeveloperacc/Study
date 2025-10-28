@@ -598,22 +598,90 @@ class FundManagerFlow(Flow[FundManagerState]):
 
     @listen(or_(evaluate_growth_potential, evaluate_value_potential))
     def synthesize_portfolio(self):
-        pass
+        """포트폴리오 매니저 - 최종 포트폴리오 구성"""
+
+        portfolio_manager = Agent(
+            role="포트폴리오 구성 전문 매니저",
+            backstory="""
+            전문 분석팀들의 결과를 종합하여 사용자 맞춤형 포트폴리오를 구성하는 전문가입니다.
+            리스크 관리, 자산 배분, 분산투자 원칙에 특화된 경험을 보유하여 최적화된 포트폴리오를 설계합니다.
+            """,
+            goal="전문팀의 분석 결과를 종합하여 사용자의 투자 목표, 성향, 예산에 맞는 최적의 포트폴리오를 구성한다.",
+            verbose=True,
+            llm="openai/o4-mini",
+        )
+
+        # 분석 결과에 따른 데이터 준비
+        if self.state.strategy_type == "growth":
+            analysis_data = f"""
+            성장주 분석 결과:
+            - 기술 트렌드: {self.state.tech_trends}
+            - 성장 점수: {self.state.growth_scores}
+            """
+        else:
+            analysis_data = f"""
+            가치/배당주 분석 결과:
+            - 안정성 점수: {self.state.stability_scores}
+            - 배당 점수: {self.state.divide_scores}
+            """
+
+        # Task 1: 포트폴리오 구성
+        portfolio_structuring_task = Task(
+            description=f"""
+            사용자 정보:
+            - 투자 목표: {self.state.investment_goal}
+            - 투자 성향: {self.state.risk_preference}
+            - 투자 예산: ${self.state.budget:,.0f}
+            - 선택된 전략: {self.state.strategy_type}
+
+            {analysis_data}
+
+            전문 분석팀의 결과를 종합하여 최적의 포트폴리오를 구성하세요:
+
+            1. 상위 점수 기업들 중에서 3-5개 종목 선정
+            2. 사용자 투자 성향에 맞는 자산 배분:
+               - 공격적: 핵심 종목 집중 (30-50%)
+               - 보수적: 균등 분산 (20-35%)
+            3. 리스크 분산 원칙 (단일 종목 최대 50% 제한)
+            4. 예산 대비 적정 투자 금액 및 비중 계산
+            5. 분석 결과의 실제 점수와 근거를 반영한 투자 사유 작성
+
+            중요한 출력 형식 요구사항:
+            - 마크다운 코드 블록(```)을 사용하지 말고 순수한 JSON만 반환
+            - JSON 앞뒤에 어떤 텍스트도 추가하지 마세요
+            - 응답은 {{ 로 시작하고 }} 로 끝나야 합니다
+            - allocation 합계는 정확히 1.0이 되도록 계산
+            - amount는 budget * allocation으로 정확히 계산
+            """,
+            agent=portfolio_manager,
+            expected_output="""A JSON object starting with {{ and ending with }}. No markdown formatting, no code blocks, no additional text. Pure JSON only. Must include allocation calculations that sum to 1.0.""",
+            output_file="output/synthesize_portfolio.json",
+        )
+
+        portfolio_synthesis_crew = Crew(
+            agents=[portfolio_manager],
+            tasks=[portfolio_structuring_task],
+            verbose=True,
+        )
+
+        self.state.portfolio = portfolio_synthesis_crew.kickoff()
 
     @listen(synthesize_portfolio)
     def finalize_investment_recommendation(self):
-        pass
+
         return self.state.portfolio
 
 
 flow = FundManagerFlow()
-flow.kickoff(
+result = flow.kickoff(
     inputs={
         "investment_goal": "AI 같은 첨단 기술주에 투자하고 싶습니다.",
         "risk_preference": "공격적",
         "budget": 20000.0,
     }
 )
+
+print(result)
 
 # flow.kickoff(
 #     inputs={
