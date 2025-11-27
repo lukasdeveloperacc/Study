@@ -1,0 +1,1 @@
+username VARCHAR(255);
