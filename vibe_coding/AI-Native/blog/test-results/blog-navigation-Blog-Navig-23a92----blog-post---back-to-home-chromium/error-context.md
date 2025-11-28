@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - navigation [ref=e7]:
+            - button "previous" [disabled] [ref=e8]:
+              - img "previous" [ref=e9]
+            - generic [ref=e11]:
+              - generic [ref=e12]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e13]:
+              - img "next" [ref=e14]
+          - img
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - generic "Latest available version is detected (16.1.0-canary.4)." [ref=e20]: Next.js 16.1.0-canary.4
+            - generic [ref=e21]: Turbopack
+          - img
+      - dialog "Runtime Error" [ref=e23]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - generic [ref=e30]: Runtime Error
+                - generic [ref=e31]: Server
+              - generic [ref=e32]:
+                - button "Copy Error Info" [ref=e33] [cursor=pointer]:
+                  - img [ref=e34]
+                - button "No related documentation found" [disabled] [ref=e36]:
+                  - img [ref=e37]
+                - button "Attach Node.js inspector" [ref=e39] [cursor=pointer]:
+                  - img [ref=e40]
+            - generic [ref=e49]: "A React Element from an older version of React was rendered. This is not supported. It can happen if: - Multiple copies of the \"react\" package is used. - A library pre-bundled an old copy of \"react\" or \"react/jsx-runtime\". - A compiler tries to \"inline\" JSX instead of using the runtime."
+          - generic [ref=e52]:
+            - paragraph [ref=e53]:
+              - text: Call Stack
+              - generic [ref=e54]: "5"
+            - button "Show 5 ignore-listed frame(s)" [ref=e55] [cursor=pointer]:
+              - text: Show 5 ignore-listed frame(s)
+              - img [ref=e56]
+        - generic [ref=e58]: "1"
+        - generic [ref=e59]: "2"
+    - generic [ref=e64] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e65]:
+        - img [ref=e66]
+      - generic [ref=e69]:
+        - button "Open issues overlay" [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]: "0"
+            - generic [ref=e73]: "1"
+          - generic [ref=e74]: Issue
+        - button "Collapse issues badge" [ref=e75]:
+          - img [ref=e76]
+  - generic [ref=e79]:
+    - 'heading "Application error: a server-side exception has occurred while loading localhost (see the server logs for more information)." [level=2] [ref=e80]'
+    - paragraph [ref=e81]: "Digest: 1970984619"
+```
