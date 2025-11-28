@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
 import { formatDate, getBlogPosts } from 'app/blog/utils'
 import { baseUrl } from 'app/sitemap'
+import { LikeButton } from 'app/components/LikeButton'
 
 export async function generateStaticParams() {
   let posts = getBlogPosts()
@@ -93,6 +94,7 @@ export default function Blog({ params }) {
       <article className="prose">
         <CustomMDX source={post.content} />
       </article>
+      <LikeButton slug={post.slug} />
     </section>
   )
 }
