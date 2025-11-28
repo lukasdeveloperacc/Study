@@ -6,6 +6,7 @@ import {
     Pressable,
     Image,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useLocalSearchParams, router } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/app/_layout";
@@ -19,10 +20,16 @@ const Header = () => {
 
     return pathname === "/@" + user?.id ? (
         <View style={styles.postInputContainer}>
-            <Image
-                source={{ uri: user?.profileImageUrl }}
-                style={styles.profileAvatar}
-            />
+            {user?.profileImageUrl ? (
+                <Image
+                    source={{ uri: user.profileImageUrl }}
+                    style={styles.profileAvatar}
+                />
+            ) : (
+                <View style={styles.profileAvatar}>
+                    <Ionicons name="person-circle" size={40} color="#ccc" />
+                </View>
+            )}
             <Text
                 style={
                     colorScheme === "dark"
@@ -124,6 +131,8 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         marginRight: 10,
+        justifyContent: "center",
+        alignItems: "center",
     },
     postInputContainer: {
         flexDirection: "row",
